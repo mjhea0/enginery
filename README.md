@@ -1,6 +1,8 @@
-<img src="https://github.com/espresso/enginery/blob/master/logo.png" align="right">
+<img src="https://github.com/espresso/enginery/master/logo.png" align="right">
 
-# Enginery - Fine-Tuned App Builder for Espresso Framework
+# Enginery
+
+**Fine-Tuned App Builder for Espresso Framework**
 
 <p>
 <a href="https://travis-ci.org/espresso/enginery">
@@ -13,7 +15,7 @@
 $ gem install enginery
 ```
 
-+ `$ rbenv rehash` if you are using `rbenv`.
+\+ `$ rbenv rehash` if you are using `rbenv`
 
 ## Quick start
 
@@ -398,6 +400,8 @@ $ rake test:Forum::Posts#read
 
 To see all available specs use `$ rake -D`
 
+**[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
+
 ## Views
 
 View generator are triggered every time you generate a route, so it make sense to use it only to create a template that was accidentally damaged/lost.
@@ -724,7 +728,7 @@ $ enginery m:up:force 1
 
 `Enginery` migrations will only update database schema.
 
-You'll have to update your models by adding/updating/removing properties manually.
+You'll have to manually update your models by adding/updating/removing properties.
 
 As a workaround you can use [dm-is-reflective](https://github.com/godfat/dm-is-reflective) plugin that will create mappings between database columns and model's properties.
 
@@ -732,7 +736,7 @@ Also, with DataMapper ORM you have extra `rake` tasks "for free", like `dm:auto_
 
 Use `$ rake -D` to list all tasks.
 
-A note on renaming columns: as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. 1.3.0 have it fixed.
+A note on renaming columns: as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. 1.3.0 have it fixed but it is not yet released.
 
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
