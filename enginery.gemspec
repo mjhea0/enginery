@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-version = "0.0.1"
+version = "0.0.2"
 Gem::Specification.new do |s|
 
   s.name = 'enginery'
@@ -14,10 +14,10 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.9.2'
 
   s.add_dependency 'e', '>= 0.4.2'
+  s.add_dependency 'bundler'
 
   s.require_paths = ['lib']
   s.files = Dir['**/{*,.[a-z]*}'].reject {|e| e =~ /\.(gem|lock)\Z/}
   s.executables = ['enginery']
-
   s.licenses = ['MIT']
 end

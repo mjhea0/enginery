@@ -21,8 +21,11 @@ when 'g'
     if unit.empty? || unit =~ /\A[p|a]/i
       # generating project
       if generator.generate_project(args[0])
-        # generating Index controller
-        puts %x[cd "#{generator.dst_root}" && "#{$0}" g:c Index]
+        Dir.chdir generator.dst_root do
+          puts "\nRunning bundler ...\n"
+          puts %x[bundle install]
+          puts %x["#{$0}" g:c Index r:/] # generating Index controller
+        end
       end
     else
 
