@@ -1,8 +1,8 @@
-<img src="https://github.com/espresso/enginery/master/logo.png" align="right">
+<img src="https://raw.github.com/espresso/enginery/master/logo.png" align="right">
 
 # Enginery
 
-**Fine-Tuned App Builder for Espresso Framework**
+### Fine-Tuned App Builder for [Espresso Framework](https://github.com/espresso/espresso)
 
 <p>
 <a href="https://travis-ci.org/espresso/enginery">
