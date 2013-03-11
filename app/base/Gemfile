@@ -6,6 +6,7 @@ group :development do # gems used on development
   gem 'specular'
   gem 'sonar'
   gem 'pry'
+  gem 'enginery'
 end
 
 group :test do # gems used when testing
