@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
+gemspec
 
 gem 'rake',     '~> 10'
 gem 'specular', '>= 0.2.1'
 gem 'sonar'
-gem 'e'
 gem 'enginery', path: File.expand_path('..', __FILE__)
 gem 'mysql', '2.8.1'
 gem 'activerecord', require: 'active_record'
