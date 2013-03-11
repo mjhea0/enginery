@@ -234,7 +234,14 @@ The file will contain controller's setups and the folder will contain controller
 
 ### Map
 
-By default the controller will be mapped to its underscored name, that's it, "Foo" to "/foo", "FooBar" to "/foo_bar", "Foo::Bar" to "/foo/bar" etc.
+By default the controller will be mapped to its underscored name, that's it:
+
+```
+Foo      to /foo
+FooBar   to /foo_bar
+Foo::Bar to /foo/bar
+etc.
+```
 
 To generate a controller mapped to a custom location, use the `route` option:
 
