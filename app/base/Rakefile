@@ -1,0 +1,4 @@
+require File.expand_path('../base/boot', __FILE__)
+
+App.boot! # starting app without starting the server
+

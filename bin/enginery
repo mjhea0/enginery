@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+require 'enginery'
+require 'enginery/usage'
+
+if $*.empty? || $*[0] == 'h' || $*[0] == '-h'
+  puts Enginery.usage
+  exit 0
+end
+
+operation = $*[0].to_s
+
+case operation[0]
+when 'g'
+  unit = operation.sub(/\Ag(enerate)?\W?/, '')
+  args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
+  generator = Enginery::Generator.new(Dir.pwd, setups)
+
+  if args
+    if unit.empty? || unit =~ /\A[p|a]/i
+      # generating project
+      if generator.generate_project(args[0])
+        # generating Index controller
+        puts %x[cd "#{generator.dst_root}" && "#{$0}" g:c Index]
+      end
+    else
+
+      generator.in_app_folder?
+      require generator.dst_path.boot_rb
+
+      case
+      when unit =~ /\Ac(ontroller)?/
+        if args.size > 1 # generate multiple controllers
+          args.each {|u| puts %x["#{$0}" g:c #{u} #{string_setups}]}
+        else
+          # generating controller
+          if generator.generate_controller(args[0])
+            # generating index route
+            puts %x["#{$0}" g:r #{args[0]} index]
+          end
+        end
+
+      when unit =~ /\Ar(oute)?/
+        if args.size > 2 # generate multiple routes
+          args[1..-1].each {|u| puts %x["#{$0}" g:r #{args[0]} #{u} #{string_setups}]}
+        else
+          if generator.generate_route(*args)
+            puts %x["#{$0}" g:v #{args[0]} #{args[1]}]
+            puts %x["#{$0}" g:s #{args[0]} #{args[1]}]
+          end
+        end
+
+      when unit =~ /\As(pec)?/
+        if args.size > 2 # generate multiple specs
+          args[1..-1].each {|u| puts %x["#{$0}" g:s #{args[0]} #{u} #{string_setups}]}
+        else
+          generator.generate_spec(*args)
+        end
+
+      when unit =~ /\Av(iew)?/
+        generator.generate_view(args[0], args[1])
+
+      when unit =~ /\Am(odel)?/
+        if args.size > 1 # generate multiple models
+          args.each {|u| puts %x["#{$0}" g:m #{u} #{string_setups}]}
+        else
+          if generator.generate_model(args[0])
+            puts %x["#{$0}" m initializing-#{args[0]}-model create_table_for:#{args[0]} #{string_setups}]
+          end
+        end
+      end
+
+    end
+  end
+
+when 'm'
+  operation = operation.sub(/\Am(igrat(e)?(ion)?)?\W?/, '')
+  args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
+  migrator = Enginery::Migrator.new(Dir.pwd, setups)
+
+  migrator.in_app_folder?
+  require migrator.dst_path.boot_rb
+
+  if operation.empty? || operation =~ /\An(ew)?/ # new migration
+    migrator.new args[0]
+  elsif operation =~ /\Al(ist)?/
+    migrator.list
+  else
+    vector, force_run = operation.scan(/(\w+)\:?(f(orce(d)?)?)?/).flatten
+    if file = setups[:file]
+      migrator.run(vector, file, force_run)
+    else
+      failed = false
+      migrator.serials_to_files(vector, *args).each do |file|
+        (puts("%s skipped due to previous errors" % file); next) if failed
+        puts %x["#{$0}" m:#{vector}:#{force_run} f:#{file} #{string_setups}]
+        $? ? (failed = true if $?.exitstatus > 0) : (failed = true)
+      end
+      exit(1) if failed
+    end
+  end
+else
+  puts "\n--- Unknown modifier %s ---\n" % operation
+  puts Enginery.usage
+end

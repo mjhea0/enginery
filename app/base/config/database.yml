@@ -1,0 +1,24 @@
+---
+development:
+  type: sqlite3
+  host: localhost
+  port: 
+  name: var/db/development.db
+  user: 
+  pass: 
+
+test:
+  type: sqlite3
+  host: localhost
+  port: 
+  name: var/db/test.db
+  user: 
+  pass: 
+
+production:
+  type: 
+  host: 
+  port: 
+  name: 
+  user: 
+  pass: 

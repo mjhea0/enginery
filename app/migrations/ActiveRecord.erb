@@ -1,0 +1,48 @@
+
+class EngineryMigratorInstance < ActiveRecord::Migration
+  def up
+    <?rb if @create_table ?>
+    create_table :#{ @create_table } do |t|
+    <?rb @create_columns.each do |(n,t)|?>
+      t.#{ t } :#{ n }
+    <?rb end ?>
+    end
+    <?rb elsif @update_table && @create_columns.any? ?>
+    change_table :#{ @update_table } do |t|
+    <?rb @create_columns.each do |(n,t)|?>
+      t.#{ t } :#{ n }
+    <?rb end ?>
+    end
+    <?rb end ?>
+    
+    <?rb @update_columns.each do |(n,t)|?>
+    change_column :#{ @update_table }, :#{ n }, :#{ t }
+    <?rb end ?>
+    
+    <?rb @rename_columns.each do |(n,nn)|?>
+    rename_column :#{ @update_table }, :#{ n }, :#{ nn }
+    <?rb end ?>
+  end
+
+  def down
+    <?rb if @create_table ?>
+    drop_table :#{ @create_table }
+    <?rb elsif @update_table ?>
+
+    <?rb @create_columns.each do |(n,t)|?>
+    remove_column :#{ @update_table }, :#{ n }
+    <?rb end ?>
+    
+    <?rb if (update_columns = @update_columns.select {|n,t,ct| ct}).any?
+    update_columns.each do |(n,t,ct)|?>
+    change_column :#{ @update_table }, :#{ n }, :#{ ct }
+    <?rb end
+    end ?>
+
+    <?rb @rename_columns.each do |(n,nn)|?>
+    rename_column :#{ @update_table }, :#{ nn }, :#{ n }
+    <?rb end ?>
+
+    <?rb end ?>
+  end
+end

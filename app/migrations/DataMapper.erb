@@ -1,0 +1,54 @@
+require 'dm-migrations'
+
+EngineryMigratorInstance = DataMapper::Migration.new #{ @step }, "#{ @name }" do
+  up do
+    <?rb if @create_table ?>
+    create_table :#{ @create_table } do
+      column :id, Integer, serial: true
+      <?rb @create_columns.each do |(n,t)|?>
+      column :#{ n }, #{ t }
+      <?rb end ?>
+    end
+    
+    <?rb elsif @update_table ?>
+    modify_table :#{ @update_table } do
+
+    <?rb @create_columns.each do |(n,t)|?>
+      add_column :#{ n }, #{ t }
+    <?rb end ?>
+
+    <?rb @update_columns.each do |(n,t)|?>
+      change_column :#{ n }, #{ t }
+    <?rb end ?>
+
+    <?rb @rename_columns.each do |(n,nn)|?>
+      rename_column :#{ n }, :#{ nn }
+    <?rb end ?>
+    end
+    <?rb end ?>
+  end
+
+  down do
+    <?rb if @create_table ?>
+    drop_table :#{ @create_table }
+    <?rb elsif @update_table ?>
+    modify_table :#{ @update_table } do
+    
+    <?rb @create_columns.each do |(n,t)|?>
+      drop_column :#{ n }
+    <?rb end ?>
+
+    <?rb if (update_columns = @update_columns.select {|n,t,ct| ct}).any?
+    update_columns.each do |(n,t,ct)|?>
+      change_column :#{ n }, #{ ct }
+    <?rb end
+    end ?>
+
+    <?rb @rename_columns.each do |(n,nn)|?>
+      rename_column :#{ nn }, :#{ n }
+    <?rb end ?>
+
+    end
+    <?rb end ?>
+  end
+end

@@ -1,0 +1,7 @@
+
+Spec.new "#{ @spec }" do
+  map #{ @controller }[:#{ @action }]
+
+  get
+  is(last_response).ok?
+end
