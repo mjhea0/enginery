@@ -28,7 +28,7 @@ module Enginery
       target_gems = File.file?(dst_path.Gemfile) ?
         extract_gems(File.read dst_path.Gemfile) : []
       
-      @setups.values_at(:orm, :engine).compact.each do |klass|
+      @setups.values_at(:orm, :engine, :server).compact.each do |klass|
         gemfiles << [src_path(:gemfiles, '%s.rb' % klass), klass]
       end
       if orm = @setups[:orm]

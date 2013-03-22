@@ -8,8 +8,7 @@ class AppConfig
 
   def initialize
     @env = (ENV['RACK_ENV'] || DEFAULT_ENV).to_s.to_sym
-    ENVIRONMENTS.include?(@env) ||
-      raise("#{@env} environment not supported. Please use one of #{ENVIRONMENTS.join ', '}")
+    ENVIRONMENTS.include?(@env) || raise("#{@env} environment not supported. Please use one of #{ENVIRONMENTS*', '}")
     @env_map = ENVIRONMENTS.inject({}) {|map,e| map.merge(e => e == env)}.freeze
 
     set_paths Dir.pwd
@@ -39,6 +38,7 @@ class AppConfig
   # see self.paths for available paths, eg. Cfg.config_path, Cfg.assets_path etc.
   # any number of arguments accepted. arguments will be joined by a slash:
   # Cfg.base_path('foo', 'bar') #=> /path/to/app/base/foo/bar
+  #
   paths.each_value do |paths|
     paths.each do |p|
       define_method '%s_path' % p do |*chunks|

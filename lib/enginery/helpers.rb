@@ -74,17 +74,17 @@ module Enginery
             setups[:orm] = valid_orm
             string_setups << a
           else
-            o 'WARN: invalid ORM provided - "%s"' % orm
+            o 'Invalid ORM provided - "%s"' % orm
             o 'Supported ORMs: ActiveRecord, DataMapper, Sequel'
             fail
           end
         when a =~ /\Ae(ngine)?:/
-          engine = extract_setup(a).to_s.to_sym
-          if valid_engine?(engine)
+          smth = extract_setup(a)
+          if engine = valid_engine?(smth)
             setups[:engine] = engine
             string_setups << a
           else
-            o 'WARN: invalid engine provided - "%s"'  % engine
+            o 'Invalid engine provided - %s' % smth
             o 'Supported engines(Case Sensitive): %s' % VIEW__ENGINE_BY_SYM.keys.join(', ')
             fail
           end
@@ -105,6 +105,32 @@ module Enginery
               (setups[:db] ||= {}).update s => (s == :type ? valid_db_type?(v) : v)
               string_setups << a
             end
+          end
+        when a =~ /\As(erver)?:/
+          smth = extract_setup(a)
+          if server = valid_server?(smth)
+            setups[:server] = server.to_sym
+            string_setups << a
+          else
+            o 'Unknown server provided - %s' % smth
+            o 'It wont be added to Gemfile nor to config.yml'
+            o 'Known servers(Case Sensitive): %s' % KNOWN_WEB_SERVERS.join(', ')
+            fail
+          end
+        when a =~ /\Ap(ort)?:/
+          smth = extract_setup(a)
+          if (port = smth.to_i) > 0
+            setups[:port] = port
+            string_setups << a
+          else
+            o 'Invalid port provided - %s' % smth
+            o 'Port should be a number'
+            fail
+          end
+        when a =~ /\Ah(ost)?:/
+          if host = extract_setup(a)
+            setups[:host] = host
+            string_setups << a
           end
 
         # migrator
@@ -169,6 +195,12 @@ module Enginery
       path.gsub(/\/+/, '/').sub(regexp, '')
     end
 
+    def valid_server? smth
+      server = smth.to_s.to_sym
+      KNOWN_WEB_SERVERS.include?(server) ? server : false
+    end
+    module_function :valid_server?
+
     def valid_orm? smth
       return unless smth.is_a?(String) || smth.is_a?(Symbol)
       case
@@ -195,8 +227,9 @@ module Enginery
     end
     module_function :valid_db_type?
 
-    def valid_engine? engine
-      VIEW__ENGINE_BY_SYM.has_key? engine.to_sym
+    def valid_engine? smth
+      engine = smth.to_s.to_sym
+      VIEW__ENGINE_BY_SYM.has_key?(engine) ? engine : false
     end
     module_function :valid_engine?
 
