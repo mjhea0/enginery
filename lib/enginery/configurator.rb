@@ -9,15 +9,15 @@ module Enginery
     end
 
     def update_config_yml
-      return if (setups = @setups.dup).empty?
+      return if (setups = @setups.inject({}){|s,(k,v)| s.merge k.to_s => v}).empty?
 
-      cfg = YAML.load(File.read(dst_path.config_yml))
+      setups.delete 'db'
+      yml = YAML.load File.read(dst_path.config_yml)
       ENVIRONMENTS.each do |env|
-        env_cfg = cfg[env] || cfg[env.to_s] || next
-        env_cfg.update setups
+        (cfg = yml[env] || yml[env.to_s]) && cfg.update(setups)
       end
       o
-      write_file dst_path.config_yml, YAML.dump(cfg)
+      write_file dst_path.config_yml, YAML.dump(yml)
       output_source_code YAML.dump(setups).split("\n")
     end
 
@@ -31,7 +31,8 @@ module Enginery
       @setups.values_at(:orm, :engine).compact.each do |klass|
         gemfiles << [src_path(:gemfiles, '%s.rb' % klass), klass]
       end
-      if (orm = @setups[:orm]) && (db_type = (@setups[:db]||{})[:type])
+      if orm = @setups[:orm]
+        db_type = (@setups[:db]||{})[:type] || DEFAULT_DB_TYPE
         gemfiles << [src_path(:gemfiles, db_type, '%s.rb' % orm)]
       end
       gemfiles.each do |(gemfile,gem)|
@@ -95,17 +96,16 @@ module Enginery
     end
 
     def update_database_yml
-      return unless (s = @setups[:db]) && (type = s[:type])
-      setups = Hash[s.keys.map(&:to_s).zip(s.values.map(&:to_s))]
-      source_file = src_path(:database, '%s.yml' % type)
-      cfg = YAML.load(File.read source_file)
+      setups = (@setups[:db]||{}).inject({}){|s,(k,v)| s.merge k.to_s => v}
+      type   = setups['type'] || DEFAULT_DB_TYPE
+      yml    = YAML.load File.read(src_path(:database, '%s.yml' % type))
       ENVIRONMENTS.each do |env|
-        env_cfg = cfg[env] || cfg[env.to_s] || next
-        env_cfg.update setups
+        (cfg = yml[env] || yml[env.to_s]) && cfg.update(setups)
       end
       o
-      write_file dst_path.database_yml, YAML.dump(cfg)
-      output_source_code YAML.dump(setups).split("\n")
+      write_file dst_path.database_yml, YAML.dump(yml)
+      setups['pass'] = '___________' if setups['pass']
+      output_source_code(YAML.dump(setups).split("\n")) if setups.any?
     end
 
     private
