@@ -47,6 +47,7 @@ module Enginery
         update_boot_rb
         update_config_yml
         update_database_rb
+        update_database_yml
       end
     end
 

@@ -1,23 +1,23 @@
 ---
 development:
-  type: sqlite3
+  type: mysql
   host: localhost
   port: 
-  name: var/db/development.db
+  name: 
   user: 
   pass: 
 
 test:
-  type: sqlite3
+  type: mysql
   host: localhost
   port: 
-  name: var/db/test.db
+  name: 
   user: 
   pass: 
 
 production:
-  type: 
-  host: 
+  type: mysql
+  host: localhost
   port: 
   name: 
   user: 

@@ -197,6 +197,38 @@ $ enginery g orm:sequel
 $ enginery g o:sq
 ```
 
+It is also possible to set database connection info. Accepted options:
+
+    - db_type (or dbtype)
+    - db_host (or dbhost)
+    - db_port (or dbport)
+    - db_name (or dbname)
+    - db_user (or dbuser)
+    - db_pass (or dbpass)
+
+project using MySQL:
+```bash
+$ enginery g dbtype:MySQL
+# or
+$ enginery g dbtype:mysql
+# or just
+$ enginery g dbtype:m
+```
+
+project using PostgreSQL:
+```bash
+$ enginery g dbtype:postgres
+# or just
+$ enginery g dbtype:p
+```
+
+project using Sqlite:
+```bash
+$ enginery g dbtype:sqlite
+# or just
+$ enginery g dbtype:s
+```
+
 Enginery also allow to specify [format](https://github.com/espresso/espresso/blob/master/docs/Routing.md#format) to be used by all controllers / actions.
 
 Ex: to make all actions to serve URLs ending in `.html`, use `format:html`:

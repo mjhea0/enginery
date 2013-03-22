@@ -19,6 +19,7 @@ module Enginery
     # and column_transitions.yml file in base/migrations/track/
     # migration file will contain "up" and "down" sections.
     # column_transitions file will keep track of column type changes.
+    #
     def new name
       (name.nil? || name.empty?) && fail("Please provide migration name via second argument")
       (name =~ /[^\w|\d|\-|\.|\:]/) && fail("Migration name can contain only alphanumerics, dashes, semicolons and dots")
@@ -39,8 +40,7 @@ module Enginery
       elsif table = context[:update_table]
         columns = (_ = context[:create_columns]).any? ? _ : context[:update_columns]
       else
-        fail('No model provided or provided one does not exists!
-          Please use "enginery migration [create|update]_table:ModelName ..."')
+        fail('No model provided or provided one does not exists!')
       end
 
       track_file = dst_path(:migrations, :track, 'column_transitions.yml')
@@ -168,8 +168,6 @@ module Enginery
       when :ActiveRecord, :Sequel
         model.table_name
       end
-    rescue
-      nil
     end
 
     def default_column_type orm = guess_orm

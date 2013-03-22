@@ -1,0 +1,24 @@
+---
+development:
+  type: sqlite
+  host: 
+  port: 
+  name: var/db/development.db
+  user: 
+  pass: 
+
+test:
+  type: sqlite
+  host: 
+  port: 
+  name: var/db/test.db
+  user: 
+  pass: 
+
+production:
+  type: sqlite
+  host: 
+  port: 
+  name: var/db/production.db
+  user: 
+  pass: 

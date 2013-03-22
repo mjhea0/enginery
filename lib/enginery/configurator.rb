@@ -11,19 +11,6 @@ module Enginery
     def update_config_yml
       return if (setups = @setups.dup).empty?
 
-      db_setups = setups.delete(:db)
-      if db_setups && db_setups.any?
-        o
-        cfg = YAML.load(File.read(dst_path.database_yml))
-        ENVIRONMENTS.each do |env|
-          env_cfg = cfg[env] || cfg[env.to_s] || next
-          env_cfg.update db_setups
-        end
-        write_file dst_path.database_yml, YAML.dump(cfg)
-        output_source_code YAML.dump(db_setups).split("\n")
-      end
-
-      return if setups.empty?
       cfg = YAML.load(File.read(dst_path.config_yml))
       ENVIRONMENTS.each do |env|
         env_cfg = cfg[env] || cfg[env.to_s] || next
@@ -37,28 +24,28 @@ module Enginery
     def update_gemfile
       return if @setups.empty?
 
-      gems = []
+      gems, gemfiles = [], []
       target_gems = File.file?(dst_path.Gemfile) ?
         extract_gems(File.read dst_path.Gemfile) : []
-
-      @setups.values_at(
-        :orm,
-        :engine
-      ).compact.each do |klass|
-        gemfile = src_path(:gemfiles, "#{klass}.rb")
+      
+      @setups.values_at(:orm, :engine).compact.each do |klass|
+        gemfiles << [src_path(:gemfiles, '%s.rb' % klass), klass]
+      end
+      if (orm = @setups[:orm]) && (db_type = (@setups[:db]||{})[:type])
+        gemfiles << [src_path(:gemfiles, db_type, '%s.rb' % orm)]
+      end
+      gemfiles.each do |(gemfile,gem)|
         if File.file?(gemfile)
           File.readlines(gemfile).each do |l|
-            extract_gems(l).each do |gem|
-              gems << l.chomp unless target_gems.include?(gem)
+            extract_gems(l).each do |g|
+              gems << l.chomp unless target_gems.include?(g)
             end
           end
         else
-          gem = class_to_gem(klass)
+          next unless gem
+          gem = class_to_gem(gem)
           gems << ("gem '%s'" % gem) unless target_gems.include?(gem)
         end
-      end
-      if (db_setup = @setups[:db]) && (gem = db_setup[:type])
-        gems << ("gem '%s'" % gem) unless target_gems.include?(gem)
       end
       return if gems.empty?
       o
@@ -79,7 +66,7 @@ module Enginery
       source_code = File.readlines(source_file)
       
       if orm = @setups[:orm]
-        source_file = src_path(:rakefiles, "#{orm}.rb")
+        source_file = src_path(:rakefiles, '%s.rb' % orm)
         source_code.concat  File.readlines(source_file)
       end
       o
@@ -99,12 +86,26 @@ module Enginery
 
     def update_database_rb
       if orm = @setups[:orm]
-        source_file = src_path(:database, "#{orm}.rb")
+        source_file = src_path(:database, '%s.rb' % orm)
         source_code = File.readlines(source_file)
         o
         update_file dst_path.database_rb, source_code
         output_source_code(source_code)
       end
+    end
+
+    def update_database_yml
+      return unless (s = @setups[:db]) && (type = s[:type])
+      setups = Hash[s.keys.map(&:to_s).zip(s.values.map(&:to_s))]
+      source_file = src_path(:database, '%s.yml' % type)
+      cfg = YAML.load(File.read source_file)
+      ENVIRONMENTS.each do |env|
+        env_cfg = cfg[env] || cfg[env.to_s] || next
+        env_cfg.update setups
+      end
+      o
+      write_file dst_path.database_yml, YAML.dump(cfg)
+      output_source_code YAML.dump(setups).split("\n")
     end
 
     private

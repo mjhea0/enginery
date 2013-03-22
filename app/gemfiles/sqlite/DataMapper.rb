@@ -1,0 +1,1 @@
+gem 'dm-sqlite-adapter'

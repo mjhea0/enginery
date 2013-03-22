@@ -99,10 +99,10 @@ module Enginery
             setups[:route] = route
             string_setups << a
           end
-        when a =~ /\Adb_/
-          %w[type host port name user pass].each do |s|
-            if (a =~ /\Adb_#{s}:/) && (v = extract_setup(a))
-              (setups[:db] ||= {}).update s => v
+        when a =~ /\Adb/
+          [:type, :host, :port, :name, :user, :pass].each do |s|
+            if (a =~ /\Adb(_)?#{s}:/) && (v = extract_setup(a))
+              (setups[:db] ||= {}).update s => (s == :type ? valid_db_type?(v) : v)
               string_setups << a
             end
           end
@@ -169,21 +169,34 @@ module Enginery
       path.gsub(/\/+/, '/').sub(regexp, '')
     end
 
-    def valid_orm? orm
-      return unless orm.is_a?(String)
+    def valid_orm? smth
+      return unless smth.is_a?(String) || smth.is_a?(Symbol)
       case
-      when orm =~ /\Aa/i
+      when smth =~ /\Aa/i
         :ActiveRecord
-      when orm =~ /\Ad/i
+      when smth =~ /\Ad/i
         :DataMapper
-      when orm =~ /\As/i
+      when smth =~ /\As/i
         :Sequel
       end
     end
     module_function :valid_orm?
 
+    def valid_db_type? smth
+      return unless  smth.is_a?(String) || smth.is_a?(Symbol)
+      case
+      when smth =~ /\Am/i
+        :mysql
+      when smth =~ /\Ap/i
+        :postgres
+      when smth =~ /\As/i
+        :sqlite
+      end
+    end
+    module_function :valid_db_type?
+
     def valid_engine? engine
-      VIEW__ENGINE_BY_SYM.has_key? engine
+      VIEW__ENGINE_BY_SYM.has_key? engine.to_sym
     end
     module_function :valid_engine?
 
