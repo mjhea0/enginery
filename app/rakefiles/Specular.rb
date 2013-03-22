@@ -13,6 +13,7 @@ end
 
 namespace :test do
   App.mounted_controllers.each do |c|
+    next if c.ancestors.map(&:to_s).include? 'Rear'
     [nil].concat(c.public_actions).each do |action|
       task_name = [c.name, action].compact*'#'
       desc 'Run tests for %s' % task_name
