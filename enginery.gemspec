@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9.2'
 
-  s.add_dependency 'e', '>= 0.4.2'
+  s.add_dependency 'e', '>= 0.4.4'
   s.add_dependency 'bundler'
 
   s.require_paths = ['lib']
