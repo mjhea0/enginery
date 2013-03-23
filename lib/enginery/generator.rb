@@ -172,7 +172,6 @@ module Enginery
       
       superclass, insertions = '', []
       if orm = setups[:orm] || Cfg[:orm]
-        Configurator.new(dst_root, orm: orm).update_gemfile
         orm =~ /\Aa/i && superclass = ' < ActiveRecord::Base'
         orm =~ /\As/i && superclass = ' < Sequel::Model'
         if orm =~ /\Ad/i
