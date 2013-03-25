@@ -290,6 +290,7 @@ And of course you can pass multiple options:
 $ enginery g o:ar e:Slim f:html
 ```
 
+
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
 
@@ -374,10 +375,31 @@ module Foo
     # ...
   end
 end
-``` 
+```
 
 **Worth to note** that `Bar` controller will be mapped to "/foo/bar" URL.<br>
 To map it to another location, use `route` option as shown above.
+
+
+### Including modules
+
+If your controller needs extra modules included, use `include:` option:
+
+```bash
+$ enginery g:c Foo include:Bar
+# or just
+$ enginery g:c Foo i:Bar
+```
+
+This will generate `Foo` controller with `Bar` included:
+
+```ruby
+module Foo < E
+  include Bar
+  # ...
+end
+```
+
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
@@ -582,6 +604,27 @@ $ enginery g:m A B C
 # or just for readability
 $ enginery g:models A B C
 ```
+
+
+### Including modules
+
+If your model needs extra modules included, use `include:` option:
+
+```bash
+$ enginery g:m Foo include:Bar
+# or just
+$ enginery g:m Foo i:Bar
+```
+
+This will generate `Foo` model with `Bar` included:
+
+```ruby
+module Foo < ActiveRecord::Base
+  include Bar
+  # ...
+end
+```
+
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
