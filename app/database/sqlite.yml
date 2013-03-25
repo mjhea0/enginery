@@ -1,6 +1,6 @@
 ---
 development:
-  type: sqlite
+  type: sqlite3
   host: 
   port: 
   name: var/db/development.db
@@ -8,7 +8,7 @@ development:
   pass: 
 
 test:
-  type: sqlite
+  type: sqlite3
   host: 
   port: 
   name: var/db/test.db
@@ -16,9 +16,9 @@ test:
   pass: 
 
 production:
-  type: sqlite
+  type: 
   host: 
   port: 
-  name: var/db/production.db
+  name: 
   user: 
   pass: 
