@@ -30,7 +30,7 @@ class AppConfig
   # full path to application root,
   # ie. the folder containing base/ public/ var/ etc.
   def root_path *chunks
-    File.join(@path[:root], *chunks)
+    File.join(@path[p], *chunks.map(&:to_s))
   end
 
   # defining helper methods for paths so it will be possible to use
@@ -42,7 +42,7 @@ class AppConfig
   paths.each_value do |paths|
     paths.each do |p|
       define_method '%s_path' % p do |*chunks|
-        File.join(@path[p], *chunks)
+        File.join(@path[p], *chunks.map(&:to_s))
       end
     end
   end
