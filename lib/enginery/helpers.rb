@@ -132,6 +132,9 @@ module Enginery
             setups[:host] = host
             string_setups << a
           end
+        when a =~ /\Ai(nclude)?:/
+          mdl = validate_constant_name extract_setup(a)
+          (setups[:include] ||= []).push mdl
 
         # migrator
         when a =~ /\Acreate_table_for:/
@@ -280,11 +283,12 @@ module Enginery
     module_function :o
 
     def validate_constant_name constant
-      constant =~ /\W/      && fail("Wrong constant name - %s, it should contain only alphanumerics" % constant)
+      constant =~ /[^\w|\d|\:]/ && fail("Wrong constant name - %s, it should contain only alphanumerics" % constant)
       constant =~ /\A[0-9]/ && fail("Wrong constant name - %s, it should start with a letter" % constant)
       constant =~ /\A[A-Z]/ || fail("Wrong constant name - %s, it should start with a uppercase letter" % constant)
       constant
     end
+    module_function :validate_constant_name
 
     def validate_action_name action
       action =~ /\W/ && fail("Action names may contain only alphanumerics")

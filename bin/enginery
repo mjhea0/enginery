@@ -8,6 +8,10 @@ if $*.empty? || $*[0] == 'h' || $*[0] == '-h'
   puts Enginery.usage
   exit 0
 end
+if $*[0] == 'v' || $*[0] == '-v'
+  puts EngineryVersion::FULL
+  exit 0
+end
 
 operation = $*[0].to_s
 

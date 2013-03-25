@@ -59,6 +59,11 @@ module Enginery
       source_code, i = [], INDENT * before.size
       before.each {|s| source_code << s}
       source_code << "#{i}class #{ctrl_name} < E"
+      
+      (@setups[:include] || []).each do |mdl|
+        source_code << "#{i + INDENT}include #{mdl}"
+      end
+    
       source_code << "#{i + INDENT}# controller-wide setups"
 
       if route = setups[:route]
@@ -179,6 +184,9 @@ module Enginery
           insertions << ''
           insertions << 'property :id, Serial'
         end
+      end
+      (@setups[:include] || []).each do |mdl|
+        insertions << "include #{mdl}"
       end
       insertions << ''
 

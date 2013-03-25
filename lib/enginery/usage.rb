@@ -1,5 +1,9 @@
+require 'enginery/version'
+
 def Enginery.usage
 <<USAGE
+
+Enginery version #{EngineryVersion::FULL}
 
 Generator:
 

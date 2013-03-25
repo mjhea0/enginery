@@ -44,6 +44,14 @@ module Enginery
               source_code = File.read file
               does(source_code) =~ /class\s+Foo/
               does(source_code) =~ /include\s+DataMapper/
+
+              Should 'include modules provided via include: option' do
+                is(new_model 'Bar i:Rack::Utils').ok?
+
+                file = 'base/models/bar.rb'
+                is(File).file? file
+                does(File.read file) =~ /include Rack::Utils/
+              end
             end
           end
           cleanup

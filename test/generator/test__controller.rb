@@ -76,6 +76,14 @@ module Enginery
               is(new_controller 'Foo').ok?
 
               is(File).file? 'base/views/foo/index.slim'
+
+              Should 'include modules provided via include: option' do
+                is(new_controller 'Bar i:Rack::Utils').ok?
+
+                file = 'base/controllers/bar_controller.rb'
+                is(File).file? file
+                does(File.read file) =~ /include Rack::Utils/
+              end
             end
           end
           cleanup
@@ -106,6 +114,7 @@ module Enginery
             end
           end
           cleanup
+
         end
 
       end

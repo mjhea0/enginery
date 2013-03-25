@@ -1,14 +1,14 @@
 # encoding: UTF-8
 
-version = "0.0.4"
+require File.expand_path('../lib/enginery/version', __FILE__)
 Gem::Specification.new do |s|
 
   s.name = 'enginery'
-  s.version = version
+  s.version = EngineryVersion::FULL
   s.authors = ['Silviu Rusu']
   s.email = ['slivuz@gmail.com']
   s.homepage = 'https://github.com/espresso/enginery'
-  s.summary = 'enginery-%s' % version
+  s.summary = 'enginery-%s' % EngineryVersion::FULL
   s.description = 'Fine-Tuned App Builder for Espresso Framework'
 
   s.required_ruby_version = '>= 1.9.2'
