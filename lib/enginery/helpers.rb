@@ -135,6 +135,7 @@ module Enginery
         when a =~ /\Ai(nclude)?:/
           mdl = validate_constant_name extract_setup(a)
           (setups[:include] ||= []).push mdl
+          string_setups << a
 
         # migrator
         when a =~ /\Acreate_table_for:/

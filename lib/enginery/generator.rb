@@ -176,17 +176,17 @@ module Enginery
       before, model_name, after = namespace_to_source_code(name)
       
       superclass, insertions = '', []
-      if orm = setups[:orm] || Cfg[:orm]
-        orm =~ /\Aa/i && superclass = ' < ActiveRecord::Base'
-        orm =~ /\As/i && superclass = ' < Sequel::Model'
-        if orm =~ /\Ad/i
-          insertions << 'include DataMapper::Resource'
-          insertions << ''
-          insertions << 'property :id, Serial'
+      if orm = valid_orm?(setups[:orm] || Cfg[:orm])
+        orm == :ActiveRecord && superclass = ' < ActiveRecord::Base'
+        orm == :Sequel       && superclass = ' < Sequel::Model'
+        orm == :DataMapper   && insertions << 'include DataMapper::Resource'
+        
+        (@setups[:include] || []).each do |mdl|
+          insertions << "include #{mdl}"
         end
-      end
-      (@setups[:include] || []).each do |mdl|
-        insertions << "include #{mdl}"
+        insertions << ''
+
+        orm == :DataMapper && insertions << 'property :id, Serial'
       end
       insertions << ''
 
