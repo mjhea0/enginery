@@ -10,7 +10,7 @@ App = EspressoApp.new :automount do
   
   controllers_setup do
     view_path 'base/views'
-    engine(Cfg[:engine]) if Cfg[:engine]
+    engine(Cfg[:engine].to_sym) if Cfg[:engine]
     format(Cfg[:format]) if Cfg[:format]
   end
 
