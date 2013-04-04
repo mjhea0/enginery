@@ -20,10 +20,10 @@ class AppConfig
 
   def self.paths
     {
-      :root   => [:config, :base, :public, :var, :tmp],
-      :base   => [:models, :views, :controllers, :helpers, :specs, :migrations],
-      :var    => [:pid, :log],
-      :public => [:assets],
+        root: [:config, :base, :public, :var, :tmp],
+        base: [:models, :views, :controllers, :helpers, :specs, :migrations],
+         var: [:pid, :log],
+      public: [:assets],
     }
   end
 
