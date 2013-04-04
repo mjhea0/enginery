@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'e', '>= 0.4.4'
   s.add_dependency 'bundler'
+  s.add_dependency 'tenjin'
 
   s.require_paths = ['lib']
   s.files = Dir['**/{*,.[a-z]*}'].reject {|e| e =~ /\.(gem|lock)\Z/}

@@ -2,8 +2,10 @@ require 'fileutils'
 require 'logger'
 require 'yaml'
 require 'date'
-require 'tenjin/lib/tenjin'
+
 require 'e'
+require 'tenjin'
+
 require 'enginery/enginery'
 require 'enginery/helpers'
 require 'enginery/configurator'
