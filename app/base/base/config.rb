@@ -30,7 +30,7 @@ class AppConfig
   # full path to application root,
   # ie. the folder containing base/ public/ var/ etc.
   def root_path *chunks
-    File.join(@path[p], *chunks.map(&:to_s))
+    File.join(@path[:root], *chunks.map(&:to_s))
   end
 
   # defining helper methods for paths so it will be possible to use
