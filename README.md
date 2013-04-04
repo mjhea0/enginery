@@ -19,13 +19,13 @@ $ gem install enginery
 
 ## Quick start
 
-Create new application in `./App/` folder:
+Create a new application in `./App/` folder:
 
 ```bash
 $ enginery g App
 ```
 
-Create new application in current folder:
+Create a new application in current folder:
 
 ```bash
 $ enginery g
