@@ -6,7 +6,7 @@ Bundler.require(Cfg.env)
 
 require Cfg.base_path('database.rb')
 
-App = EspressoApp.new :automount do
+App = E.new :automount do
   
   controllers_setup do
     view_path 'base/views'

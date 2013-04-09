@@ -1,6 +1,6 @@
 module Enginery
   module Helpers
-    include EspressoUtils
+    include EUtils
 
     def src_path *args
       @src_path_map ||= begin
