@@ -19,5 +19,5 @@ end
 
 # gems used on any environment
 gem 'e'
+gem 'e-periphery'
 gem 'thin'
-gem 'sprockets'
