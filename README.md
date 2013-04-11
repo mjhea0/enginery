@@ -2,7 +2,7 @@
 
 # Enginery
 
-### Fine-Tuned App Builder for [Espresso Framework](https://github.com/espresso/espresso)
+### Stuff Builder for [Espresso Framework](https://github.com/espresso/espresso)
 
 <p>
 <a href="https://travis-ci.org/espresso/enginery">

@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email = ['slivuz@gmail.com']
   s.homepage = 'https://github.com/espresso/enginery'
   s.summary = 'enginery-%s' % EngineryVersion::FULL
-  s.description = 'Fine-Tuned App Builder for Espresso Framework'
+  s.description = 'Stuff Builder for Espresso Framework'
 
   s.required_ruby_version = '>= 1.9.2'
 
