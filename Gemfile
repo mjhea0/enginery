@@ -11,5 +11,6 @@ gem 'datamapper'
 gem 'dm-mysql-adapter'
 gem 'sequel'
 
+gem 'e-periphery'
 gem 'sprockets'
 gem 'slim'

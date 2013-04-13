@@ -85,7 +85,7 @@ module Enginery
             string_setups << a
           else
             o 'Invalid engine provided - %s' % smth
-            o 'Supported engines(Case Sensitive): %s' % VIEW__ENGINE_BY_SYM.keys.join(', ')
+            o 'Supported engines(Case Sensitive): %s' % EConstants::VIEW__ENGINE_BY_SYM.keys.join(', ')
             fail
           end
         when a =~ /\Af(ormat|ile)?:/
@@ -233,7 +233,7 @@ module Enginery
 
     def valid_engine? smth
       engine = smth.to_s.to_sym
-      VIEW__ENGINE_BY_SYM.has_key?(engine) ? engine : false
+      EConstants::VIEW__ENGINE_BY_SYM.has_key?(engine) ? engine : false
     end
     module_function :valid_engine?
 
