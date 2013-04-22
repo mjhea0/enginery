@@ -15,7 +15,9 @@ module Enginery
     SCGI
   ].map(&:to_sym).freeze
 
-  TRACKING_TABLE = :z__enginery__migrator_tracks
+  # using z_ prefix to make sure tracking table shown last
+  # when some database management tools used.
+  TRACKING_TABLE = :z_enginery_migrator_tracks
   TRACKING_TABLE__COLUMNS = [:migration, :performed_at, :vector].freeze
   TRACKING_TABLE__INDEXES = [:migration].freeze
 end

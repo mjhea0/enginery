@@ -88,11 +88,10 @@ module Enginery
     end
 
     # - validate migration file name
-    # - apply migration in given direction if:
-    #   * migration was not previously performed in given direction
-    #   * :force option given
-    # - create a file with same name in track/ dir
-    #   so on consequent requests we may know when migration was last performed
+    # - apply migration in given direction if migration was not previously performed
+    #   in given direction or :force option given
+    # - create a track in TRACKING_TABLE
+    #   so on consequent requests we may know whether migration was already performed
     def run vector, file, force_run = nil
       vector = validate_vector(vector)
       
@@ -172,14 +171,18 @@ module Enginery
         TracksMigrator.instance_exec { @up_action.call }
       when :ActiveRecord
         TracksMigrator.new.up
+      when :Sequel
+        TracksMigrator.apply DB, :up
       end
     end
 
     def track_exists? migration, vector
+      conditions = {migration: migration, vector: vector.to_s}
       case guess_orm
       when :ActiveRecord, :DataMapper
-        conditions = {migration: migration, vector: vector}
         TracksModel.first(conditions: conditions)
+      when :Sequel
+        TracksModel.first(conditions)
       end
     end
 
@@ -193,6 +196,9 @@ module Enginery
       when :ActiveRecord
         TracksModel.delete_all(key)
         TracksModel.create(row)
+      when :Sequel
+        TracksModel.where(key).delete
+        TracksModel.insert(row)
       end
     end
 
