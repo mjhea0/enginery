@@ -3,7 +3,7 @@ module Enginery
     include Helpers
 
     TIME_FORMAT = '%Y-%m-%d_%H-%M-%S'.freeze
-    NAME_REGEXP = /\A(\d+)\.(\d+\-\d+\-\d+_\d+\-\d+\-\d+)\.(.*)\.rb\Z/
+    NAME_REGEXP = /\A(\d+)\.(\d+\-\d+\-\d+_\d+\-\d+\-\d+)\.(.*)\.rb\Z/.freeze
 
     def initialize dst_root, setups
       @dst_root, @setups = dst_root, setups
@@ -99,30 +99,26 @@ module Enginery
       (migration = @migrations.find {|m| File.basename(m.last) == file}) ||
         fail('"%s" is not a valid migration file' % file)
       
-      track = dst_path(:migrations, :track, file)
-      if File.exists?(track) && !force_run
-        track_data = File.read(track)
-        if track_data =~ %r[\A#{vector}]i
-          o
-          o '  This migration was already performed %s' % track_data
-          o '  Use :force option to run it anyway - enginery m:%s:force ...' % vector 
-          o
-          fail
-        end
+      tracking_table_exists?
+
+      track = track_exists?(file, vector)
+      if track && !force_run
+        o
+        o '  This migration was already performed %s on %s' % [track.vector.upcase, track.performed_at]
+        o '  Use :force option to run it anyway - enginery m:%s:force ...' % vector
+        o
+        fail
       end
-      if apply!(migration, vector)
-        FileUtils.mkdir_p File.dirname(track)
-        File.open(track, 'w') {|f| f << [vector.to_s.upcase, DateTime.now.rfc2822]*' on '}
-      end
+      apply!(migration, vector) && persist_track(file, vector)
     end
 
     # list available migrations with date of last run, if any
     def list
+      tracking_table_exists?
       o indent('--'), '-=---'
       @migrations.each do |(step,time,name,file)|
-        file  = File.basename(file)
-        track = dst_path(:migrations, :track, file)
-        last_perform = File.exists?(track) ? File.read(track) : 'none'
+        track = track_exists?(File.basename file)
+        last_perform = track ? '%s on %s' % [track.vector, track.performed_at] : 'none'
         o indent(step), ' : ', name
         o indent('created at'), ' : ', DateTime.strptime(time, TIME_FORMAT).rfc2822
         o indent('last performed'), ' : ', last_perform
@@ -155,8 +151,35 @@ module Enginery
       rescue => e
         o '    status: failed'
         o '     error: %s' % e.message
-        e.backtrace.each{|l| o l}
+        e.backtrace.each {|l| o l}
         fail
+      end
+    end
+
+    def tracking_table_exists?
+      require src_path(:migrations, 'tracking_table/%s.rb' % guess_orm)
+      case guess_orm
+      when :DataMapper
+      when :ActiveRecord
+        Enginery::TrackingTableMigrator.new.up
+      end
+    end
+
+    def track_exists? migration, vector
+      case guess_orm
+      when :ActiveRecord, :DataMapper
+        conditions = {migration: migration, vector: vector}
+        Enginery::ZEngineryMigrationTracks.first(conditions: conditions)
+      end
+    end
+
+    def persist_track migration, vector
+      key = {migration: migration}
+      row = key.merge(performed_at: DateTime.now.rfc2822, vector: vector.to_s)
+      case guess_orm
+      when :ActiveRecord
+        Enginery::ZEngineryMigrationTracks.delete_all(key)
+        Enginery::ZEngineryMigrationTracks.create(row)
       end
     end
 

@@ -28,36 +28,36 @@ module Enginery
                   Ensure '"up" migration runs ok after "down" migration performed' do
                     is(migrate_up! 1).ok?
                   end
-                end
 
-                Context 'adding/updating columns' do
-                  is(new_migration("addEmail model:A add_column:email:string")).ok?
-                  
-                  Ensure '"up" is adding "email" column and "down" is dropping it' do
-                    check(table('as')).has_no_column('email')
-
-                    is(migrate_up! 2).ok?
-                    check(table('as')).has_column('email',  :string)
+                  Context 'adding/updating columns' do
+                    is(new_migration("addEmail model:A add_column:email:string")).ok?
                     
-                    is(migrate_down! 2).ok?
-                    check(table('as')).has_no_column('email')
+                    Ensure '"up" is adding "email" column and "down" is dropping it' do
+                      check(table('as')).has_no_column('email')
 
-                    Ensure 'up migration runs ok after down migration performed' do
                       is(migrate_up! 2).ok?
                       check(table('as')).has_column('email',  :string)
-
-                      Ensure '"up" is changing "email" type to "text"' do
-                        is(new_migration("chEmail model:A update_column:email:text")).ok?
-
-                        is(migrate_up! 3).ok?
-                        check(table('as')).has_column('email',  :text)
-
-                        And '"down" is reverting it to "string"' do
-                          is(migrate_down! 3).ok?
-                          check(table('as')).has_column('email',  :string)
-                        end
-                      end
                       
+                      is(migrate_down! 2).ok?
+                      check(table('as')).has_no_column('email')
+
+                      Ensure 'up migration runs ok after down migration performed' do
+                        is(migrate_up! 2).ok?
+                        check(table('as')).has_column('email',  :string)
+
+                        Ensure '"up" is changing "email" type to "text"' do
+                          is(new_migration("chEmail model:A update_column:email:text")).ok?
+
+                          is(migrate_up! 3).ok?
+                          check(table('as')).has_column('email',  :text)
+
+                          And '"down" is reverting it to "string"' do
+                            is(migrate_down! 3).ok?
+                            check(table('as')).has_column('email',  :string)
+                          end
+                        end
+                        
+                      end
                     end
                   end
                 end

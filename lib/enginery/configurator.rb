@@ -96,7 +96,9 @@ module Enginery
     end
 
     def update_database_yml
-      setups = (@setups[:db]||{}).inject({}){|s,(k,v)| s.merge k.to_s => v}
+      setups = (@setups[:db]||{}).inject({}) do |s,(k,v)|
+        s.merge k.to_s => (v && v.match(/\A\d+\Z/) ? v.to_i : v.to_s)
+      end
       type   = setups['type'] || DEFAULT_DB_TYPE
       yml    = YAML.load File.read(src_path(:database, '%s.yml' % type))
       ENVIRONMENTS.each do |env|
