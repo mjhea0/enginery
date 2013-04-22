@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    enginery (0.0.7)
+    enginery (0.0.8)
       bundler
       e (>= 0.4.5)
       tenjin

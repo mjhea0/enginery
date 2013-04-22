@@ -99,7 +99,7 @@ module Enginery
       (migration = @migrations.find {|m| File.basename(m.last) == file}) ||
         fail('"%s" is not a valid migration file' % file)
       
-      tracking_table_exists?
+      create_tracking_table_if_needed
 
       track = track_exists?(file, vector)
       if track && !force_run
@@ -114,7 +114,7 @@ module Enginery
 
     # list available migrations with date of last run, if any
     def list
-      tracking_table_exists?
+      create_tracking_table_if_needed
       o indent('--'), '-=---'
       @migrations.each do |(step,time,name,file)|
         track = track_exists?(File.basename file)
@@ -131,7 +131,7 @@ module Enginery
     # load migration file and call corresponding methods that will run migration up/down
     def apply! migration, vector, orm = guess_orm
       o
-      o '*** Running %s step #%s ***' % [vector, migration.first]
+      o '*** Performing %s step #%s ***' % [vector, migration.first]
       o '     Label: %s' % migration[2]
       o '       ORM: %s' % orm
       begin
@@ -140,7 +140,16 @@ module Enginery
 
         case orm
         when :DataMapper
-          ::EngineryMigratorInstance.send 'perform_%s' % vector
+          ::EngineryMigratorInstance.instance_exec do
+            # when using perform_up/down DataMapper will create a tracking table
+            # and decide whether migration should be run, based on needs_up? and needs_down?
+            # Enginery keeps own tracks and does not need DataMapper's tracking table
+            # nor decisions on running migrations,
+            # so using instance_exec to apply migrations directly.
+            if action = instance_variable_get('@%s_action' % vector)
+              action.call
+            end
+          end
         when :ActiveRecord
           ::EngineryMigratorInstance.new.send vector
         when :Sequel
@@ -156,12 +165,13 @@ module Enginery
       end
     end
 
-    def tracking_table_exists?
+    def create_tracking_table_if_needed
       require src_path(:migrations, 'tracking_table/%s.rb' % guess_orm)
       case guess_orm
       when :DataMapper
+        TracksMigrator.instance_exec { @up_action.call }
       when :ActiveRecord
-        Enginery::TrackingTableMigrator.new.up
+        TracksMigrator.new.up
       end
     end
 
@@ -169,7 +179,7 @@ module Enginery
       case guess_orm
       when :ActiveRecord, :DataMapper
         conditions = {migration: migration, vector: vector}
-        Enginery::ZEngineryMigrationTracks.first(conditions: conditions)
+        TracksModel.first(conditions: conditions)
       end
     end
 
@@ -177,9 +187,12 @@ module Enginery
       key = {migration: migration}
       row = key.merge(performed_at: DateTime.now.rfc2822, vector: vector.to_s)
       case guess_orm
+      when :DataMapper
+        TracksModel.all(key).destroy!
+        TracksModel.create(row)
       when :ActiveRecord
-        Enginery::ZEngineryMigrationTracks.delete_all(key)
-        Enginery::ZEngineryMigrationTracks.create(row)
+        TracksModel.delete_all(key)
+        TracksModel.create(row)
       end
     end
 
