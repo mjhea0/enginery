@@ -62,22 +62,28 @@ module Enginery
     def update_model_file model, context
       return unless guess_orm == :DataMapper
       file = dst_path(:models, class_to_route(model) + '.rb')
-      if File.file?(file)
-        lines, properties = File.readlines(file), []
-        lines.each_with_index do |l,i|
-          property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
-          properties << [*property, i] if property[1] && property[2]
-        end
-        if create_columns = context[:create_columns]
-          if properties.any?
-            new_properties = []
-            create_columns.each do |(n,t)|
-              new_properties << '%sproperty :%s, %s' % [properties.last.first, n, t.to_s.split('::').last]
-            end
-            lines[properties.last.last] += new_properties.join("\n")
-          end
+      return unless File.file?(file)
+
+      lines, properties = File.readlines(file), []
+      lines.each_with_index do |l,i|
+        property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
+        properties << (property << i) if property[1] && property[2]
+      end
+      return if properties.empty?
+
+      new_properties = []
+      context[:create_columns].each do |(n,t)|
+        next if properties.find {|p| p[1].to_s == n.to_s}
+        new_properties << '%sproperty :%s, %s' % [properties.last.first, n, t.to_s.split('::').last]
+      end
+      lines[properties.last.last] += new_properties.join("\n")
+        
+      context[:rename_columns].each do |(cn,nn)|
+        if property = properties.find {|p| p[1].to_s == cn.to_s}
+          lines[property.last] = '%sproperty :%s, %s%s' % [property[0], nn, *property[2..3]]
         end
       end
+    
     end
 
     # convert given range or a single migration into files to be run
