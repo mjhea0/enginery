@@ -96,9 +96,7 @@ module Enginery
     end
 
     def update_database_yml
-      setups = (@setups[:db]||{}).inject({}) do |s,(k,v)|
-        s.merge k.to_s => (v && v.match(/\A\d+\Z/) ? v.to_i : v.to_s)
-      end
+      setups = normalize_setups(@setups[:db])
       type   = setups['type'] || DEFAULT_DB_TYPE
       yml    = YAML.load File.read(src_path(:database, '%s.yml' % type))
       ENVIRONMENTS.each do |env|
@@ -124,5 +122,15 @@ module Enginery
         gems
       end
     end
+    
+    def normalize_setups setups = {}
+      (setups||{}).inject({}) do |s,(k,v)|
+        key, val = k.to_s, v
+        val = val.to_i if v.respond_to?(:match) && v.match(/\A\d+\Z/)
+        val = val.to_s if val.is_a?(Symbol)
+        s.merge key => val
+      end
+    end
+
   end
 end
