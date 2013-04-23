@@ -849,17 +849,11 @@ $ enginery m:up:force 1
 
 ### DataMapper Notes
 
-`Enginery` migrations will only update database schema.
-
-You'll have to manually update your models by adding/updating/removing properties.
-
-As a workaround you can use [dm-is-reflective](https://github.com/godfat/dm-is-reflective) plugin that will create mappings between database columns and model's properties.
-
-Also, with DataMapper ORM you have extra `rake` tasks "for free", like `dm:auto_migrate`, `dm:auto_upgrade`, `dm:auto_migrate:ModelName`, `dm:auto_upgrade:ModelName`
+With DataMapper ORM you have extra `rake` tasks "for free", like `dm:auto_migrate`, `dm:auto_upgrade`, `dm:auto_migrate:ModelName`, `dm:auto_upgrade:ModelName`
 
 Use `$ rake -D` to list all tasks.
 
-A note on renaming columns: as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. 1.3.0 have it fixed but it is not yet released.
+**Note on renaming columns:** as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. Master branch have it [fixed](https://github.com/datamapper/dm-migrations/blob/8bfcec08286a12ceee1bc3e5a01da3b5b7d4a74d/lib/dm-migrations/sql/table_modifier.rb#L35) but not yet released.
 
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
