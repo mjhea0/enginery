@@ -5,7 +5,6 @@ group :development do # gems used on development
   gem 'specular'
   gem 'sonar'
   gem 'pry'
-  gem 'enginery'
 end
 
 group :test do # gems used when testing
@@ -21,3 +20,5 @@ end
 gem 'e'
 gem 'e-periphery'
 gem 'thin'
+
+gem 'enginery' # needed to run migrations

@@ -92,6 +92,9 @@ class AppConfig
   end
 
   def load_db_config
+    if url = ENV['DATABASE_URL']
+      return @db = {url: url}.freeze
+    end
     @db = load_file('database.yml').freeze
   end
 
