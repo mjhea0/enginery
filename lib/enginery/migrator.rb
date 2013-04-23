@@ -38,11 +38,12 @@ module Enginery
       if table = context[:create_table]
         columns = context[:create_columns]
       elsif table = context[:update_table]
-        columns = (_ = context[:create_columns]).any? ? _ : context[:update_columns]
+        columns = (cc = context[:create_columns]).any? ? cc : context[:update_columns]
       else
         fail('No model provided or provided one does not exists!')
       end
 
+      update_model_file(model, context)
       handle_transitions(table, columns)
 
       engine = Tenjin::Engine.new(path: [src_path.migrations], cache: false)
@@ -56,6 +57,27 @@ module Enginery
       file = dst_path(:migrations, [context[:step], time, name, 'rb']*'.')
       write_file file, source_code
       output_source_code source_code.split("\n")
+    end
+
+    def update_model_file model, context
+      return unless guess_orm == :DataMapper
+      file = dst_path(:models, class_to_route(model) + '.rb')
+      if File.file?(file)
+        lines, properties = File.readlines(file), []
+        lines.each_with_index do |l,i|
+          property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
+          properties << [*property, i] if property[1] && property[2]
+        end
+        if create_columns = context[:create_columns]
+          if properties.any?
+            new_properties = []
+            create_columns.each do |(n,t)|
+              new_properties << '%sproperty :%s, %s' % [properties.last.first, n, t.to_s.split('::').last]
+            end
+            lines[properties.last.last] += new_properties.join("\n")
+          end
+        end
+      end
     end
 
     # convert given range or a single migration into files to be run

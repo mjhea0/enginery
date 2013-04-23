@@ -202,7 +202,7 @@ module Enginery
       after.each  {|s| source_code << s}
       source_code = source_code.join("\n")
       
-      path = dst_path(:models, class_to_route(name))
+      path = dst_path(:models, class_to_route(name) + '.rb')
       File.exists?(path) && fail("#{name} model already exists")
       
       o
