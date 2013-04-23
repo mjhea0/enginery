@@ -9,7 +9,7 @@ module Enginery
     end
 
     def update_config_yml
-      return if (setups = @setups.inject({}){|s,(k,v)| s.merge k.to_s => v}).empty?
+      return if (setups = normalize_setups(@setups)).empty?
 
       setups.delete 'db'
       yml = YAML.load File.read(dst_path.config_yml)

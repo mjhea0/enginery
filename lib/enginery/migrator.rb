@@ -246,9 +246,9 @@ module Enginery
     end
 
     def guess_orm
-      @setups[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
+      (@setups[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
         Please update config/config.yml by adding "orm: [:DataMapper|:ActiveRecord|:Sequel]"
-        or provide it via orm option - orm:[ar|dm|sq]')
+        or provide it via orm option - orm:[ar|dm|sq]')).to_sym
     end
 
     def validate_vector vector
