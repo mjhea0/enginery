@@ -79,10 +79,17 @@ module Enginery
       lines[properties.last.last] += new_properties.join("\n")
         
       context[:rename_columns].each do |(cn,nn)|
-        if property = properties.find {|p| p[1].to_s == cn.to_s}
-          lines[property.last] = '%sproperty :%s, %s%s' % [property[0], nn, *property[2..3]]
-        end
+        next unless property = properties.find {|p| p[1].to_s == cn.to_s}
+        property_setup = [property[0], nn, *property[2..3]]
+        lines[property.last] = '%sproperty :%s, %s%s' % property_setup
       end
+
+      context[:update_columns].each do |(n,t)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        property_setup = [*property[0..1], t.to_s.split('::').last, property[3]]
+        lines[property.last] = '%sproperty :%s, %s%s' % property_setup
+      end
+      puts lines.join
     
     end
 
