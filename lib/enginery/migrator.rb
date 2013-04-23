@@ -43,15 +43,7 @@ module Enginery
         fail('No model provided or provided one does not exists!')
       end
 
-      track_file = dst_path(:migrations, :track, 'column_transitions.yml')
-      track_data = File.file?(track_file) ? (YAML.load(File.read(track_file)) rescue {}) : {}
-      track_data[table] ||= {}
-      columns.each do |column|
-        column << track_data[table][column.first]
-        track_data[table][column.first] = column[1]
-      end
-      FileUtils.mkdir_p File.dirname(track_file)
-      File.open(track_file, 'w') {|f| f << YAML.dump(track_data)}
+      handle_transitions(table, columns)
 
       engine = Tenjin::Engine.new(path: [src_path.migrations], cache: false)
       source_code = engine.render("#{guess_orm}.erb", context)
@@ -162,6 +154,17 @@ module Enginery
         e.backtrace.each {|l| o l}
         fail
       end
+    end
+
+    def handle_transitions table, columns
+      transitions_file = dst_path(:migrations, 'transitions.yml')
+      transitions = File.file?(transitions_file) ? (YAML.load(File.read(transitions_file)) rescue {}) : {}
+      transitions[table] ||= {}
+      columns.each do |column|
+        column << transitions[table][column.first]
+        transitions[table][column.first] = column[1]
+      end
+      File.open(transitions_file, 'w') {|f| f << YAML.dump(transitions)}
     end
 
     def create_tracking_table_if_needed
