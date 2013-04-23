@@ -1,7 +1,6 @@
 require 'yaml'
 
 class AppConfig
-
   ENVIRONMENTS = [:development, :test, :production].freeze
   DEFAULT_ENV  = ENVIRONMENTS.first
   attr_reader :path, :db, :env
@@ -100,9 +99,9 @@ class AppConfig
 
   def load_file file
     path = config_path(file)
-    data = File.file?(path) ? YAML.load(File.read(path)) : nil
+    data = File.file?(path) ? (YAML.load(File.read(path)) rescue nil) : nil
     return indifferent_params(data[@env] || data[@env.to_s]) if data.is_a?(Hash)
-    warn "#{file} does not exists or does not contain valid YAML"
+    warn '"%s" does not exists or is not a valid YAML file' % file
     {}
   end
 
@@ -124,7 +123,5 @@ class AppConfig
   def indifferent_hash
     Hash.new {|hash,key| hash[key.to_s] if Symbol === key }
   end
-
 end
-
 Cfg = AppConfig.new
