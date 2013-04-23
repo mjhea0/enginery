@@ -62,27 +62,55 @@ module Enginery
                   end
                 end
 
-                Context 'renaming columns', 
-                  # skipping DataMapper until 1.3.0 release
-                  # as rename_column is broken for now
-                  skip: orm == 'DataMapper' do
+                if orm == 'DataMapper'
+                  # running this test only on DataMapper
+                  model_file = 'base/models/a.rb'
 
-                  is(new_migration("reName model:A rename_column:name:first_name")).ok?
+                  Ensure 'foo property does not exists' do
+                    refute(File.read(model_file)) =~ /property\W+foo/
+                  end
 
-                  table = table('as')
-                  check(table).has_column('name')
-                  check(table).has_no_column('first_name')
+                  Ensure 'foo property added with new migration' do
+                    is(new_migration("addFoo model:A column:foo")).ok?
+                    does(File.read(model_file)) =~ /property\W+foo/
 
-                  Ensure '"up" section is renaming "name" to "first_name"' do
-                    is(migrate_up! 4).ok?
+                    Ensure 'foo property renamed to bar with new migration' do
+                      is(new_migration("fooTObar model:A rename_column:foo:bar")).ok?
+                      refute(File.read(model_file)) =~ /property\W+foo/
+                      does(File.read(model_file)) =~ /property\W+bar/
+
+                      Should 'change property type with new migration' do
+                        does(File.read(model_file)) =~ /property\W+bar\W+String/
+                        is(new_migration("updateBAR model:A update_column:bar:text")).ok?
+                        refute(File.read(model_file)) =~ /property\W+bar\W+String/
+                        does(File.read(model_file)) =~ /property\W+bar\W+Text/
+                      end
+                    end
+                  end
+                  
+                else
+                  # `rename_column` is broken on DataMapper 1.2.0
+                  # so skipping renameColumnsTest for DataMapper until fix released.
+
+                  Context 'renaming columns' do
+
+                    is(new_migration("reName model:A rename_column:name:first_name")).ok?
+
                     table = table('as')
-                    check(table).has_column('first_name')
-                    check(table).has_no_column('name')
-                    Ensure '"down" section renaming "first_name" to "name"' do
-                      is(migrate_down! 4).ok?
+                    check(table).has_column('name')
+                    check(table).has_no_column('first_name')
+
+                    Ensure '"up" section is renaming "name" to "first_name"' do
+                      is(migrate_up! 4).ok?
                       table = table('as')
-                      check(table).has_column('name')
-                      check(table).has_no_column('first_name')
+                      check(table).has_column('first_name')
+                      check(table).has_no_column('name')
+                      Ensure '"down" section renaming "first_name" to "name"' do
+                        is(migrate_down! 4).ok?
+                        table = table('as')
+                        check(table).has_column('name')
+                        check(table).has_no_column('first_name')
+                      end
                     end
                   end
                 end
@@ -90,11 +118,9 @@ module Enginery
               end
 
             end
-
           end
           cleanup
         end
-
       end
     end
   end

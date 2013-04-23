@@ -202,12 +202,12 @@ module Enginery
       after.each  {|s| source_code << s}
       source_code = source_code.join("\n")
       
-      path = dst_path(:models, class_to_route(name) + '.rb')
-      File.exists?(path) && fail("#{name} model already exists")
+      file = dst_path(:models, class_to_route(name) + '.rb')
+      File.exists?(file) && fail('"%s" file already exists' % unrootify(file))
       
       o
       o '=== Generating "%s" model ===' % name
-      dir = File.dirname(path)
+      dir = File.dirname(file)
       if File.exists?(dir)
         File.directory?(dir) || fail("#{unrootify dir} should be a directory")
       else
@@ -215,7 +215,7 @@ module Enginery
         FileUtils.mkdir_p(dir)
       end
       
-      write_file path + '.rb', source_code
+      write_file file, source_code
       output_source_code source_code.split("\n")
     end
 

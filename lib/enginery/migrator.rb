@@ -59,40 +59,6 @@ module Enginery
       output_source_code source_code.split("\n")
     end
 
-    def update_model_file model, context
-      return unless guess_orm == :DataMapper
-      file = dst_path(:models, class_to_route(model) + '.rb')
-      return unless File.file?(file)
-
-      lines, properties = File.readlines(file), []
-      lines.each_with_index do |l,i|
-        property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
-        properties << (property << i) if property[1] && property[2]
-      end
-      return if properties.empty?
-
-      new_properties = []
-      context[:create_columns].each do |(n,t)|
-        next if properties.find {|p| p[1].to_s == n.to_s}
-        new_properties << '%sproperty :%s, %s' % [properties.last.first, n, t.to_s.split('::').last]
-      end
-      lines[properties.last.last] += new_properties.join("\n")
-        
-      context[:rename_columns].each do |(cn,nn)|
-        next unless property = properties.find {|p| p[1].to_s == cn.to_s}
-        property_setup = [property[0], nn, *property[2..3]]
-        lines[property.last] = '%sproperty :%s, %s%s' % property_setup
-      end
-
-      context[:update_columns].each do |(n,t)|
-        next unless property = properties.find {|p| p[1].to_s == n.to_s}
-        property_setup = [*property[0..1], t.to_s.split('::').last, property[3]]
-        lines[property.last] = '%sproperty :%s, %s%s' % property_setup
-      end
-      puts lines.join
-    
-    end
-
     # convert given range or a single migration into files to be run
     # ex: 1-5 will run migrations from one to 5 inclusive
     #     1 2 4 will run 1st, 2nd, and 4th migrations
@@ -189,6 +155,44 @@ module Enginery
         e.backtrace.each {|l| o l}
         fail
       end
+    end
+
+    def update_model_file model, context
+      return unless guess_orm == :DataMapper
+      file = dst_path(:models, class_to_route(model) + '.rb')
+      return unless File.file?(file)
+
+      lines, properties = File.readlines(file), []
+      lines.each_with_index do |l,i|
+        property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
+        properties << (property << i) if property[1] && property[2]
+      end
+      return if properties.empty?
+      property_setup = nil
+      
+      new_properties = []
+      context[:create_columns].each do |(n,t)|
+        next if properties.find {|p| p[1].to_s == n.to_s}
+        property_setup = [properties.last.first, n, t.to_s.split('::').last]
+        new_properties << '%sproperty :%s, %s' % property_setup
+      end
+      if new_properties.any?
+        lines[properties.last.last] += (new_properties.join("\n") + "\n")
+      end
+        
+      context[:rename_columns].each do |(cn,nn)|
+        next unless property = properties.find {|p| p[1].to_s == cn.to_s}
+        property_setup = [property[0], nn, *property[2..3]]
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property_setup
+      end
+
+      context[:update_columns].each do |(n,t)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        property_setup = [*property[0..1], t.to_s.split('::').last, property[3]]
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property_setup
+      end
+      return unless property_setup
+      File.open(file, 'w') {|f| f << lines.join}
     end
 
     def handle_transitions table, columns
