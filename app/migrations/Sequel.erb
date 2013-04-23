@@ -1,48 +1,51 @@
 Sequel.extension :migration
+module Enginery
+  class Migrator
+    MigratorInstance = Sequel.migration do
+      up do
+        <?rb if @create_table ?>
+        create_table :#{ @create_table } do
+          primary_key :id
+          <?rb @create_columns.each do |(n,t)| ?>
+          column :#{ n }, #{ t }
+          <?rb end ?>
+        end
+        <?rb elsif @update_table && (@create_columns.any? || @update_columns.any?) ?>
+        alter_table :#{ @update_table } do
+        <?rb @create_columns.each do |(n,t)| ?>
+          add_column :#{ n }, #{ t }
+        <?rb end ?>
+        <?rb @update_columns.each do |(n,t)| ?>
+          set_column_type :#{ n }, #{ t }
+        <?rb end ?>
+        end
+        <?rb end ?>
 
-EngineryMigratorInstance = Sequel.migration do
-  up do
-    <?rb if @create_table ?>
-    create_table :#{ @create_table } do
-      primary_key :id
-      <?rb @create_columns.each do |(n,t)| ?>
-      column :#{ n }, #{ t }
-      <?rb end ?>
+        <?rb @rename_columns.each do |(n,nn)|?>
+        rename_column :#{ @update_table }, :#{ n }, :#{ nn }
+        <?rb end ?>
+      end
+
+      down do
+        <?rb if @create_table ?>
+        drop_table :#{ @create_table }
+        <?rb elsif @update_table && (@create_columns.any? || @update_columns.any?) ?>
+        alter_table :#{ @update_table } do
+        <?rb @create_columns.each do |(n,t)| ?>
+          drop_column :#{ n }
+        <?rb end ?>
+        <?rb if (update_columns = @update_columns.select {|n,t,ct| ct}).any?
+        update_columns.each do |(n,t,ct)|?>
+          set_column_type :#{ n }, #{ ct }
+        <?rb end
+        end ?>
+        end
+        <?rb end ?>
+
+        <?rb @rename_columns.each do |(n,nn)|?>
+        rename_column :#{ @update_table }, :#{ nn }, :#{ n }
+        <?rb end ?>
+      end
     end
-    <?rb elsif @update_table && (@create_columns.any? || @update_columns.any?) ?>
-    alter_table :#{ @update_table } do
-    <?rb @create_columns.each do |(n,t)| ?>
-      add_column :#{ n }, #{ t }
-    <?rb end ?>
-    <?rb @update_columns.each do |(n,t)| ?>
-      set_column_type :#{ n }, #{ t }
-    <?rb end ?>
-    end
-    <?rb end ?>
-
-    <?rb @rename_columns.each do |(n,nn)|?>
-    rename_column :#{ @update_table }, :#{ n }, :#{ nn }
-    <?rb end ?>
-  end
-
-  down do
-    <?rb if @create_table ?>
-    drop_table :#{ @create_table }
-    <?rb elsif @update_table && (@create_columns.any? || @update_columns.any?) ?>
-    alter_table :#{ @update_table } do
-    <?rb @create_columns.each do |(n,t)| ?>
-      drop_column :#{ n }
-    <?rb end ?>
-    <?rb if (update_columns = @update_columns.select {|n,t,ct| ct}).any?
-    update_columns.each do |(n,t,ct)|?>
-      set_column_type :#{ n }, #{ ct }
-    <?rb end
-    end ?>
-    end
-    <?rb end ?>
-
-    <?rb @rename_columns.each do |(n,nn)|?>
-    rename_column :#{ @update_table }, :#{ nn }, :#{ n }
-    <?rb end ?>
   end
 end

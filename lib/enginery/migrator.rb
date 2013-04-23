@@ -131,7 +131,7 @@ module Enginery
 
         case orm
         when :DataMapper
-          ::EngineryMigratorInstance.instance_exec do
+          MigratorInstance.instance_exec do
             # when using perform_up/down DataMapper will create a tracking table
             # and decide whether migration should be run, based on needs_up? and needs_down?
             # Enginery keeps own tracks and does not need DataMapper's tracking table
@@ -142,9 +142,9 @@ module Enginery
             end
           end
         when :ActiveRecord
-          ::EngineryMigratorInstance.new.send vector
+          MigratorInstance.new.send vector
         when :Sequel
-          ::EngineryMigratorInstance.apply DB, vector
+          MigratorInstance.apply DB, vector
         end
         o '    status: OK'
         true
