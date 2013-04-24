@@ -100,10 +100,11 @@ when 'm'
     else
       failed = false
       migrator.serials_to_files(vector, *args).each do |file|
-        (puts("%s skipped due to previous errors" % file); next) if failed
+        (puts("\n  %s skipped due to previous errors\n" % file); next) if failed
         puts %x["#{$0}" m:#{vector}:#{force_run} f:#{file} #{string_setups}]
         $? ? (failed = true if $?.exitstatus > 0) : (failed = true)
       end
+      puts
       exit(1) if failed
     end
   end

@@ -14,15 +14,15 @@ module Enginery
                 is(new_model 'A add_column:name').ok?
                 is(migrate_up! 1).ok?
 
-                Ensure 'repetitive "up" migrations fails' do
-                  does(migrate_up! 1).fail?
+                Should 'skip repetitive "up" migrations' do
+                  is(migrate_up! 1).skipped?
                 end
 
                 Context 'performing migration down' do
                   is(migrate_down! 1).ok?
 
-                  Ensure 'repetitive "down" migrations fails' do
-                    does(migrate_down! 1).fail?
+                  Should 'skip repetitive "down" migrations' do
+                    is(migrate_down! 1).skipped?
                   end
 
                   Ensure '"up" migration runs ok after "down" migration performed' do

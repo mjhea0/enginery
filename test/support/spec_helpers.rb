@@ -58,6 +58,11 @@ module Enginery
         true
       end
       alias fail_with? fail?
+
+      def skipped? output
+        output =~ /skip/i
+        output =~ /already performed/i
+      end
       
       def cleanup
         FileUtils.rm_rf DST_ROOT + 'App'

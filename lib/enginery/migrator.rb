@@ -96,10 +96,11 @@ module Enginery
       track = track_exists?(file, vector)
       if track && !force_run
         o
-        o '  This migration was already performed %s on %s' % [track.vector.upcase, track.performed_at]
+        o '  Skipping "%s: %s" migration' % [migration[0], migration[2]]
+        o '  It was already performed %s on %s' % [track.vector.upcase, track.performed_at]
         o '  Use :force option to run it anyway - enginery m:%s:force ...' % vector
         o
-        fail
+        return
       end
       apply!(migration, vector) && persist_track(file, vector)
     end
@@ -109,7 +110,7 @@ module Enginery
       create_tracking_table_if_needed
       o indent('--'), '-=---'
       @migrations.each do |(step,time,name,file)|
-        track = track_exists?(File.basename file)
+        track = track_exists?(File.basename(file))
         last_perform = track ? '%s on %s' % [track.vector, track.performed_at] : 'none'
         o indent(step), ' : ', name
         o indent('created at'), ' : ', DateTime.strptime(time, TIME_FORMAT).rfc2822
@@ -153,6 +154,7 @@ module Enginery
         o '    status: failed'
         o '     error: %s' % e.message
         e.backtrace.each {|l| o l}
+        o
         fail
       end
     end
@@ -218,8 +220,9 @@ module Enginery
       end
     end
 
-    def track_exists? migration, vector
-      conditions = {migration: migration, vector: vector.to_s}
+    def track_exists? migration, vector = nil
+      conditions = {migration: migration}
+      conditions[:vector] = vector.to_s if vector # #to_s required on Sequel
       case guess_orm
       when :ActiveRecord, :DataMapper
         TracksModel.first(conditions: conditions)
