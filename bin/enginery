@@ -82,7 +82,7 @@ when 'g'
   end
 
 when 'm'
-  operation = operation.sub(/\Am(igrat(e)?(ion)?)?\W?/, '')
+  operation = operation.sub(/\Am(igrat(e)?(ion)?)?(\W+)?/, '')
   args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
   migrator = Enginery::Migrator.new(Dir.pwd, setups)
 
@@ -94,18 +94,48 @@ when 'm'
   elsif operation =~ /\Al(ist)?/
     migrator.list
   else
-    vector, force_run = operation.scan(/(\w+)\:?(f(orce(d)?)?)?/).flatten
+    vector, extra = operation.scan(/(\w+)\:?(\w+)?/).flatten
+    force_run, force_yes = extra ? [extra.match(/\Af/i), extra.match(/\Ay/i)] : []
+    
     if file = setups[:file]
       migrator.run(vector, file, force_run)
     else
+      files = migrator.serials_to_files(vector, *args)
+      
+      if files.empty?
+        outstanding_files = migrator.outstanding_migrations(vector)
+        
+        if force_yes
+          files = outstanding_files
+        else
+          puts 'This will run all outstanding migrations in the following order:'
+          puts
+          puts outstanding_files.map {|f| f[/\A\d+/]}*' '
+          puts
+          puts '  Type Y and press enter to Continue'
+          puts '  Press enter to Abort'
+          puts '  Use :yes options to get rid of this prompt - enginery:%s:yes ...' % vector
+          answer = STDIN.gets.strip
+          files  = outstanding_files if answer.match(/\Ay/i)
+        end
+      end
+      
+      if files.empty?
+        puts
+        puts 'Nothing to run, exiting'
+        puts
+        exit 0
+      end
+
       failed = false
-      migrator.serials_to_files(vector, *args).each do |file|
+      files.each do |file|
         (puts("\n  %s skipped due to previous errors\n" % file); next) if failed
         puts %x["#{$0}" m:#{vector}:#{force_run} f:#{file} #{string_setups}]
         $? ? (failed = true if $?.exitstatus > 0) : (failed = true)
       end
       puts
       exit(1) if failed
+
     end
   end
 else

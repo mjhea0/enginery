@@ -1,6 +1,7 @@
 require 'enginery/version'
 
-def Enginery.usage
+class << Enginery
+  def usage
 <<USAGE
 
 Enginery version #{EngineryVersion::FULL}
@@ -36,6 +37,13 @@ Generator Options:
 
     Note: engine name should be provided in full and are case sensitive
 
+#{ migrator_usage }
+
+USAGE
+  end
+
+  def migrator_usage
+<<USAGE
 Migrator:
   
   enginery m[igration] migration-name m[odel]:Foo c[olumn]:bar     - create bar column of string type
@@ -54,4 +62,5 @@ Migrator:
   enginery m[igrate]:up|down N-M - perform up|down migrations with serial numbers from N to M
  
 USAGE
+  end
 end

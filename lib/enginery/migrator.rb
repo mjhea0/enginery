@@ -96,7 +96,7 @@ module Enginery
       track = track_exists?(file, vector)
       if track && !force_run
         o
-        o '  Skipping "%s: %s" migration' % [migration[0], migration[2]]
+        o '*** Skipping "%s: %s" migration ***' % [migration[0], migration[2]]
         o '  It was already performed %s on %s' % [track.vector.upcase, track.performed_at]
         o '  Use :force option to run it anyway - enginery m:%s:force ...' % vector
         o
@@ -117,6 +117,14 @@ module Enginery
         o indent('last performed'), ' : ', last_perform
         o indent('--'), '-=---'
       end
+    end
+
+    def outstanding_migrations vector
+      create_tracking_table_if_needed
+      serials = @migrations.inject([]) do |l,(step,time,name,file)|
+        track_exists?(File.basename(file), vector) ? l : l.push(step)
+      end
+      serials_to_files(vector, *serials)
     end
 
     private
