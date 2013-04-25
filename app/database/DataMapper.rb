@@ -1,3 +1,4 @@
+DataMapper::Logger.new($stdout, :debug) if File.basename($0) == 'rake'
 if url = Cfg.db[:url]
   DataMapper.setup(:default, url)
 elsif Cfg.db[:type] && Cfg.db[:name]
