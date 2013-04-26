@@ -323,5 +323,9 @@ module Enginery
       (source.is_a?(String) ? File.readlines(source) : source).each {|l| o "+ " + l.chomp}
     end
 
+    def controller_file? ctrl
+      File.exists? dst_path(:controllers, class_to_route(ctrl.name) + '_controller.rb')
+    end
+
   end
 end
