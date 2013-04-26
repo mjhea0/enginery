@@ -1,3 +1,4 @@
+
 namespace :dm do
   %w[auto_migrate auto_upgrade].each do |t|
     alert = 'ACHTUNG! This is a DESTRUCTIVE action!' if t == 'auto_migrate'
@@ -16,6 +17,5 @@ namespace :dm do
       puts "\n  Running DataMapper.%s!\n\n" % t
       DataMapper.send(t + '!')
     end
-    
   end
 end

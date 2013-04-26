@@ -1,7 +1,7 @@
 
 Dir[Cfg.specs_path('**/*_spec.rb')].each {|f| require f}
 
-SpecularSession = Specular.new do
+specular_session = Specular.new do
   boot do
     include Sonar
   end
@@ -11,25 +11,19 @@ SpecularSession = Specular.new do
   end
 end
 
-namespace :test do
-  App.mounted_controllers.each do |c|
-    next if c.ancestors.map(&:to_s).include? 'Rear'
-    [nil].concat(c.public_actions).each do |action|
-      task_name = [c.name, action].compact*'#'
-      desc 'Run tests for %s' % task_name
-      task task_name do
-        puts "\n--- Testing %s ---" % task_name
-        puts SpecularSession.run %r[\A#{task_name}]
-        SpecularSession.exit_code == 0 || fail
-      end
-    end
+specular_tasks   = []
+App.mounted_controllers.reject do |c|
+  next if c.ancestors.map(&:to_s).include? 'Rear'
+  task_name = 'test:' + c.name
+  desc 'Run tests for "%s" controller' % c
+  task task_name do
+    puts "", "*** %s ***" % task_name
+    puts specular_session.run /\A#{c}\W/
+    specular_session.exit_code == 0 || fail
   end
+  specular_tasks << task_name
 end
 
 desc 'Run all tests'
-task :test do
-  puts "\n--- Testing everything ---"
-  puts SpecularSession.run
-  SpecularSession.exit_code == 0 || fail
-end
+task test: specular_tasks
 task default: :test
