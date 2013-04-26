@@ -777,13 +777,7 @@ enginery m:down 4
 
 ### Running Migrations
 
-**Important Note:** `Enginery` using migrations granulation rather than migrations versioning.
-
-This mean you can run any migration at any time without implicitly calling other migrations, giving you the full, fine-grained control over your migrations.
-
-`Enginery` will keep track of migrations already performed and wont run same migration twice(unless `force` option used).
-
-You are free to choose what migration(s) to run in multiple ways.
+With Enginery you are free to choose what migration(s) to run in multiple ways.
 
 Most obvious one is to provide the serial number of a single migration:
 
@@ -796,7 +790,7 @@ When you need to run multiple migrations pass serial numbers separated by spaces
 ```bash
 $ enginery m:[up|down] 1 4 6
 ```
-this will run only 1st, 4th and 6th migrations.
+this will run 1st, 4th and 6th migrations.
 
 When you need to run N to M migrations, use N-M notation:
 
@@ -830,6 +824,19 @@ performing order: 1 2 3 4
 $ enginery m:down 1-4
 ```
 performing order: 4 3 2 1
+
+
+To **run all outstanding migrations** just do not pass any steps.
+
+Perform UP all outstanding migrations:
+```bash
+$ enginery m:up
+```
+
+Perform DOWN all outstanding migrations:
+```bash
+$ enginery m:down
+```
 
 
 To list available migrations use `$ enginery m:list` or just `$ enginery m:l`
