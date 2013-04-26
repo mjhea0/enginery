@@ -5,7 +5,7 @@ module Enginery
     TIME_FORMAT = '%Y-%m-%d_%H-%M-%S'.freeze
     NAME_REGEXP = /\A(\d+)\.(\d+\-\d+\-\d+_\d+\-\d+\-\d+)\.(.*)\.rb\Z/.freeze
 
-    def initialize dst_root, setups
+    def initialize dst_root, setups = {}
       @dst_root, @setups = dst_root, setups
       @migrations = Dir[dst_path(:migrations, '*.rb')].inject([]) do |map,f|
         step, time, name = File.basename(f).scan(NAME_REGEXP).flatten
