@@ -2,7 +2,7 @@ module Enginery
   class Generator
     
     include Helpers
-    attr_reader :boot_file, :dst_root, :setups
+    attr_reader :dst_root, :setups
 
     def initialize dst_root, setups = {}
       @dst_root, @setups = dst_root, setups
