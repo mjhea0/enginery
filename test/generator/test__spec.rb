@@ -11,12 +11,12 @@ module Enginery
 
             is(new_controller 'A').ok?
 
-            Ensure 'it generated a spec for default action' do
+            Ensure 'it generated specs for A controller' do
               is(File).file? 'base/specs/a/index_spec.rb'
-              does( new_test ' -D' ) =~ /A#index/
+              does( new_test ' -D' ) =~ /test\:A/
 
               Ensure 'auto-generated spec runs well' do
-                is( new_test 'A#index' ).ok?
+                are( new_test 'A' ).ok?
               end
             end
 
