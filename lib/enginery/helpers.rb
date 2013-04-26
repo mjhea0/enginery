@@ -1,4 +1,11 @@
 module Enginery
+  class Failure
+    attr_reader :failures
+    def initialize *failures
+      @failures = failures
+    end
+  end
+
   module Helpers
     include EUtils
 
@@ -265,14 +272,8 @@ module Enginery
       [action_file, action]
     end
 
-    def fail msg = nil
-      if msg
-        o
-        o '    ~~~ ERROR! ~~~
-        %s' % msg
-        o
-      end
-      exit 1
+    def fail *failures
+      throw :enginery_failures, Failure.new(failures)
     end
     module_function :fail
 
@@ -297,7 +298,7 @@ module Enginery
     end
 
     def namespace_to_source_code name, ensure_uninitialized = true
-      ensure_uninitialized && constant_defined?(name) && fail("#{name} constant already in use")
+      ensure_uninitialized && constant_defined?(name) && fail('"%s" constant already in use' % name)
       
       namespace = name.split('::').map {|c| validate_constant_name c}
       ctrl_name = namespace.pop
