@@ -49,6 +49,7 @@ module Enginery
         update_database_rb
         update_database_yml
       end
+      name
     end
 
     def generate_controller name
@@ -91,6 +92,7 @@ module Enginery
       
       write_file file, source_code.join("\n")
       output_source_code source_code
+      ctrl_name
     end
 
     def generate_route ctrl_name, name
@@ -140,6 +142,7 @@ module Enginery
       
       write_file action_file, source_code.join("\n")
       output_source_code source_code
+      action
     end
 
     def generate_view ctrl_name, name
@@ -168,6 +171,7 @@ module Enginery
       file = File.join(path, action + ctrl_instance.engine_ext?)
       o '***   Touching "%s" ***' % unrootify(file)
       FileUtils.touch file
+      file
     end
 
     def generate_model name
@@ -217,6 +221,7 @@ module Enginery
       
       write_file file, source_code
       output_source_code source_code.split("\n")
+      model_name
     end
 
     def generate_spec ctrl_name, name
@@ -245,6 +250,7 @@ module Enginery
 
       write_file file, source_code
       output_source_code source_code.split("\n")
+      file
     end
 
   end
