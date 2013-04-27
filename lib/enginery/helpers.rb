@@ -81,9 +81,8 @@ module Enginery
             setups[:orm] = valid_orm
             string_setups << a
           else
-            o 'Invalid ORM provided - "%s"' % orm
-            o 'Supported ORMs: ActiveRecord, DataMapper, Sequel'
-            fail
+            fail_verbosely 'Invalid ORM provided - "%s"' % orm, \
+              'Supported ORMs: ActiveRecord, DataMapper, Sequel'
           end
         when a =~ /\Ae(ngine)?:/
           smth = extract_setup(a)
@@ -91,9 +90,8 @@ module Enginery
             setups[:engine] = engine
             string_setups << a
           else
-            o 'Invalid engine provided - %s' % smth
-            o 'Supported engines(Case Sensitive): %s' % EConstants::VIEW__ENGINE_BY_SYM.keys.join(', ')
-            fail
+            fail_verbosely 'Invalid engine provided - %s' % smth, \
+              'Supported engines(Case Sensitive): %s' % EConstants::VIEW__ENGINE_BY_SYM.keys.join(', ')
           end
         when a =~ /\Af(ormat|ile)?:/
           if format = extract_setup(a)
@@ -119,10 +117,9 @@ module Enginery
             setups[:server] = server.to_sym
             string_setups << a
           else
-            o 'Unknown server provided - %s' % smth
-            o 'It wont be added to Gemfile nor to config.yml'
-            o 'Known servers(Case Sensitive): %s' % KNOWN_WEB_SERVERS.join(', ')
-            fail
+            fail_verbosely 'Unknown server provided - %s' % smth, \
+              'It wont be added to Gemfile nor to config.yml', \
+              'Known servers(Case Sensitive): %s' % KNOWN_WEB_SERVERS.join(', ')
           end
         when a =~ /\Ap(ort)?:/
           smth = extract_setup(a)
@@ -130,9 +127,7 @@ module Enginery
             setups[:port] = port
             string_setups << a
           else
-            o 'Invalid port provided - %s' % smth
-            o 'Port should be a number'
-            fail
+            fail_verbosely 'Invalid port provided - %s' % smth, 'Port should be a number'
           end
         when a =~ /\Ah(ost)?:/
           if host = extract_setup(a)
@@ -273,9 +268,15 @@ module Enginery
     end
 
     def fail *failures
-      throw :enginery_failures, Failure.new(failures)
+      throw :enginery_failures, Failure.new(*failures)
     end
     module_function :fail
+
+    def fail_verbosely *failures
+      o *failures
+      fail *failures
+    end
+    module_function :fail_verbosely
 
     def o *chunks
       @logger ||= Logger.new(STDOUT)
