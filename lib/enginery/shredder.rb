@@ -7,7 +7,7 @@ module Enginery
       @dst_root = dst_root
     end
 
-    def controller name
+    def delete_controller name
       name.nil? || name.empty? &&
         fail("Please provide controller name via second argument")
       
@@ -25,5 +25,15 @@ module Enginery
         FileUtils.rm(file)
       end
     end
+
+    def delete_route controller, name
+      file, * = valid_route?(controller, name)
+      if File.exists?(file)
+        o '*** Deleting "%s" file ***' % unrootify(file)
+        o
+        FileUtils.rm(file)
+      end
+    end
+
   end
 end

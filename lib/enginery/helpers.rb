@@ -260,16 +260,16 @@ module Enginery
       [ctrl_path, ctrl]
     end
 
-    def valid_action? ctrl_name, name
+    def valid_route? ctrl_name, name
       ctrl_path, ctrl = valid_controller?(ctrl_name)
-      name.nil? || name.empty? && fail("Please provide action/route via second argument")
+      name.nil? || name.empty? && fail("Please provide route name")
       path_rules = ctrl.path_rules.inject({}) do |map,(r,s)|
         map.merge %r[#{Regexp.escape s}] => r.source
       end
-      action = action_to_route(name, path_rules)
-      validate_action_name(action)
-      action_file = ctrl_path + action + '.rb'
-      [action_file, action]
+      route = action_to_route(name, path_rules)
+      validate_route_name(route)
+      file = ctrl_path + route + '.rb'
+      [file, route]
     end
 
     def fail *failures
@@ -292,14 +292,12 @@ module Enginery
     end
     module_function :validate_constant_name
 
-    def validate_action_name action
-      action =~ /\W/ && fail("Action names may contain only alphanumerics")
-      action
+    def validate_route_name name
+      name =~ /\W/ && fail("Routes may contain only alphanumerics")
+      name
     end
 
-    def namespace_to_source_code name, ensure_uninitialized = true
-      ensure_uninitialized && constant_defined?(name) && fail('"%s" constant already in use' % name)
-      
+    def namespace_to_source_code name
       namespace = name.split('::').map {|c| validate_constant_name c}
       ctrl_name = namespace.pop
       before, after = [], []

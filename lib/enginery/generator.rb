@@ -53,7 +53,7 @@ module Enginery
 
     def generate_controller name
 
-      name.nil? || name.empty? && fail("Please provide controller name via second argument")
+      name.nil? || name.empty? && fail("Please provide controller name")
       before, ctrl_name, after = namespace_to_source_code(name)
 
       source_code, i = [], INDENT * before.size
@@ -82,12 +82,12 @@ module Enginery
       after.each  {|s| source_code << s}
       
       path = dst_path(:controllers, class_to_route(name))
-      File.exists?(path) && fail("#{name} controller already exists")
+      file = path + '_controller.rb'
+      File.exists?(file) && fail('"%s" controller already exists' % name)
       o
       o '=== Generating "%s" controller ===' % name
       o '***   Creating "%s/" ***' % unrootify(path)
       FileUtils.mkdir_p(path)
-      file = path + '_controller.rb'
       
       write_file file, source_code.join("\n")
       output_source_code source_code
@@ -95,11 +95,11 @@ module Enginery
 
     def generate_route ctrl_name, name
 
-      action_file, action = valid_action?(ctrl_name, name)
+      action_file, action = valid_route?(ctrl_name, name)
 
-      File.exists?(action_file) && fail("#{name} action/route already exists")
+      File.exists?(action_file) && fail('"%s" route already exists' % name)
 
-      before, ctrl_name, after = namespace_to_source_code(ctrl_name, false)
+      before, ctrl_name, after = namespace_to_source_code(ctrl_name)
 
       source_code, i = [], '  ' * before.size
       before.each {|s| source_code << s}
@@ -144,13 +144,13 @@ module Enginery
 
     def generate_view ctrl_name, name
 
-      action_file, action = valid_action?(ctrl_name, name)
-      _, ctrl = valid_controller?(ctrl_name)
+      _, action = valid_route?(ctrl_name, name)
+      _, ctrl   = valid_controller?(ctrl_name)
 
       App.boot!
       ctrl_instance = ctrl.new
       ctrl_instance.respond_to?(action.to_sym) ||
-        fail("#{action} action does not exists. Please create it first")
+        fail('"%s" route does not exists. Please create it first' % action)
       
       action_name, request_method = deRESTify_action(action)
       ctrl_instance.action_setup  = ctrl.action_setup[action_name][request_method]
@@ -172,7 +172,7 @@ module Enginery
 
     def generate_model name
 
-      name.nil? || name.empty? && fail("Please provide model name via second argument")
+      name.nil? || name.empty? && fail("Please provide model name")
       before, model_name, after = namespace_to_source_code(name)
       
       superclass, insertions = '', []
@@ -223,7 +223,7 @@ module Enginery
 
       context = {}
       _, context[:controller] = valid_controller?(ctrl_name)
-      _, context[:action] = valid_action?(ctrl_name, name)
+      _, context[:action] = valid_route?(ctrl_name, name)
       context[:spec] = [ctrl_name, context[:action]]*'#'
 
       o

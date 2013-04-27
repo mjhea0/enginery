@@ -47,8 +47,8 @@ module Enginery
                   expect(code) =~ /engine\s+:Slim/m
                 end
 
-                Should 'fail with "constant already in use"' do
-                  does(new_controller 'Baz').fail_with? /already in use/i
+                Should 'fail with "controller already exists"' do
+                  does(new_controller 'Baz').fail_with? /controller already exists/i
                 end
 
                 Should 'correctly handle namespaces' do
