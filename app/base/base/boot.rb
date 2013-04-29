@@ -1,4 +1,4 @@
-require 'bundler/setup'
+require defined?(Frontline) ? 'bundler' : 'bundler/setup'
 Bundler.require(:default)
 
 require File.expand_path('../config', __FILE__)

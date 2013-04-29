@@ -4,7 +4,7 @@ module Enginery
       Spec.new self do
 
         Should 'fail cause not inside Espresso application' do
-          does(new_route 'Foo bar').fail_with? /not a generated Espresso application/
+          does(new_route 'Foo bar').fail_with? /not.*Espresso.*application/im
         end
 
         Dir.chdir DST_ROOT do

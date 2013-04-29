@@ -174,9 +174,23 @@ module Enginery
     module_function :parse_input
 
     def in_app_folder?
-      File.directory?(dst_path.controllers) ||
-        fail("Seems current folder is not a generated Espresso application")
+      File.directory?(dst_path.controllers)
     end
+
+    def fail_unless_in_app_folder!
+      in_app_folder? || fail("Seems current folder does not contain a Espresso application")
+    end
+
+    def fail *failures
+      throw :enginery_failures, Failure.new(*failures)
+    end
+    module_function :fail
+
+    def fail_verbosely *failures
+      o *failures
+      fail *failures
+    end
+    module_function :fail_verbosely
 
     private
 
@@ -266,17 +280,6 @@ module Enginery
       file = ctrl_path + route + '.rb'
       [file, route]
     end
-
-    def fail *failures
-      throw :enginery_failures, Failure.new(*failures)
-    end
-    module_function :fail
-
-    def fail_verbosely *failures
-      o *failures
-      fail *failures
-    end
-    module_function :fail_verbosely
 
     def o *chunks
       @logger ||= Logger.new(STDOUT)
