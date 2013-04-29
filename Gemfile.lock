@@ -84,7 +84,7 @@ GEM
     json (1.7.7)
     json_pure (1.7.7)
     multi_json (1.7.2)
-    mysql (2.8.1)
+    mysql (2.9.1)
     rack (1.5.2)
     rake (10.0.4)
     sequel (3.46.0)
@@ -115,7 +115,7 @@ DEPENDENCIES
   dm-mysql-adapter
   e-periphery
   enginery!
-  mysql (= 2.8.1)
+  mysql
   rake (~> 10)
   sequel
   slim
