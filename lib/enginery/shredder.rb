@@ -8,8 +8,7 @@ module Enginery
     end
 
     def delete_controller name
-      name.nil? || name.empty? &&
-        fail("Please provide controller name via second argument")
+      name.nil? || name.empty? && fail("Please provide controller name")
       
       path = dst_path(:controllers, class_to_route(name))
       if File.exists?(path)
@@ -34,6 +33,30 @@ module Enginery
         FileUtils.rm(file)
       end
     end
+
+    def delete_model name
+      name.nil? || name.empty? && fail("Please provide model name")
+
+      file = dst_path(:models, class_to_route(name))
+      if File.exists?(file)
+        o '*** Deleting "%s" file ***' % unrootify(file)
+        o
+        FileUtils.rm(file)
+      end
+    end
+
+    def delete_migration name
+      name.nil? || name.empty? && fail("Please provide migration name")
+
+      file = dst_path(:migrations, name)
+      if File.exists?(file)
+        o '*** Deleting "%s" file ***' % unrootify(file)
+        o
+        FileUtils.rm(file)
+      end
+    end
+
+
 
   end
 end

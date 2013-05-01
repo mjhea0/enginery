@@ -7,9 +7,9 @@ module Enginery
 
     def initialize dst_root, setups = {}
       @dst_root, @setups = dst_root, setups
-      @migrations = Dir[dst_path(:migrations, '*.rb')].inject([]) do |map,f|
+      @migrations = Dir[dst_path(:migrations, '**/*.rb')].inject([]) do |map,f|
         step, time, name = File.basename(f).scan(NAME_REGEXP).flatten
-        step && time && name && map << [step.to_i, time, name, f]
+        step && time && name && map << [step.to_i, time, name, f.sub(dst_path.migrations, '')]
         map
       end.sort {|a,b| a.first <=> b.first}.freeze
     end
@@ -54,7 +54,9 @@ module Enginery
       o '  Serial Number: %s' % context[:step]
       o
       time = Time.now.strftime(TIME_FORMAT)
-      file = dst_path(:migrations, [context[:step], time, name, 'rb']*'.')
+      path = dst_path(:migrations, class_to_route(model))
+      FileUtils.mkdir_p(path)
+      file = File.join(path, [context[:step], time, name, 'rb']*'.')
       write_file file, source_code
       output_source_code source_code.split("\n")
     end
@@ -77,7 +79,7 @@ module Enginery
           fail('Wrong range provided. "%s" is not a recognized migration step' % e)
       end.sort do |a,b|
         vector == :up ? a.first <=> b.first : b.first <=> a.first
-      end.map {|m| File.basename m.last}
+      end.map(&:last)
     end
 
     # - validate migration file name
@@ -88,7 +90,7 @@ module Enginery
     def run vector, file, force_run = nil
       vector = validate_vector(vector)
       
-      (migration = @migrations.find {|m| File.basename(m.last) == file}) ||
+      (migration = @migrations.find {|m| m.last == file}) ||
         fail('"%s" is not a valid migration file' % file)
       
       create_tracking_table_if_needed
@@ -137,7 +139,7 @@ module Enginery
       o '       ORM: %s' % orm
       begin
         
-        require migration.last
+        load dst_path(:migrations, migration.last)
 
         case orm
         when :DataMapper
@@ -159,11 +161,7 @@ module Enginery
         o '    status: OK'
         true
       rescue => e
-        o '    status: failed'
-        o '     error: %s' % e.message
-        e.backtrace.each {|l| o l}
-        o
-        fail
+        fail e.message, *e.backtrace
       end
     end
 
