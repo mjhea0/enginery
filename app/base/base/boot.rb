@@ -7,7 +7,8 @@ Bundler.require(Cfg.env)
 require Cfg.base_path('database.rb')
 
 App = E.new :automount do
-  
+  map hosts: Cfg[:hosts]
+
   controllers_setup do
     view_path 'base/views'
     engine(Cfg[:engine].to_sym) if Cfg[:engine]

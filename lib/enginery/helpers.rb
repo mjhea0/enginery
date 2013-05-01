@@ -129,9 +129,9 @@ module Enginery
           else
             fail_verbosely 'Invalid port provided - %s' % smth, 'Port should be a number'
           end
-        when a =~ /\Ah(ost)?:/
-          if host = extract_setup(a)
-            setups[:host] = host
+        when a =~ /\Ah(ost(s)?)?:/
+          if hosts = extract_setup(a)
+            setups[:hosts] = hosts.split(',')
             string_setups << a
           end
         when a =~ /\Ai(nclude)?:/
