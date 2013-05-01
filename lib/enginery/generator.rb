@@ -8,7 +8,7 @@ module Enginery
       @dst_root, @setups = dst_root, setups
     end
 
-    def generate_project name
+    def generate_project name = nil
       name = name.to_s
 
       if name.empty?
