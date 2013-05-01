@@ -192,6 +192,15 @@ module Enginery
     end
     module_function :fail_verbosely
 
+    def load_boot_rb
+      orig = Array.new($:)
+      # loading app
+      load dst_path.boot_rb
+      # for some reason, Bundler get rid of existing loadpath entries.
+      # usually this will break autoloading, so storing orig paths and inserting them back
+      orig.each {|p| $:.include?(p) || $: << p}
+    end
+
     private
 
     def write_file file, data

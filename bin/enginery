@@ -36,7 +36,7 @@ result = catch :enginery_failures do
       else
 
         generator.fail_unless_in_app_folder!
-        load generator.dst_path.boot_rb # loading application
+        generator.load_boot_rb # loading application
 
         case
         when unit =~ /\Ac(ontroller)?/
@@ -89,7 +89,7 @@ result = catch :enginery_failures do
     migrator = Enginery::Migrator.new(Dir.pwd, setups)
 
     migrator.fail_unless_in_app_folder!
-    load migrator.dst_path.boot_rb # loading application
+    migrator.load_boot_rb # loading application
 
     if operation.empty? || operation =~ /\An(ew)?/ # new migration
       migrator.new args[0]

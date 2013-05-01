@@ -112,7 +112,7 @@ module Enginery
       if format = setups[:format]
         source_code << "#{i + INDENT}format_for :#{action}, '#{format}'"
       end
-      if setups.any?
+      if setups.reject {|k,v| k == :route}.any?
         source_code << "#{i + INDENT}before :#{action} do"
         if engine = setups[:engine]
           source_code << "#{i + INDENT*2}engine :#{engine}"
