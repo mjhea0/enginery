@@ -150,25 +150,17 @@ module Enginery
       _, action = valid_route?(ctrl_name, name)
       _, ctrl   = valid_controller?(ctrl_name)
 
-      App.boot!
-      ctrl_instance = ctrl.new
-      ctrl_instance.respond_to?(action.to_sym) ||
-        fail('"%s" route does not exists. Please create it first' % action)
-      
-      action_name, request_method = deRESTify_action(action)
-      ctrl_instance.action_setup  = ctrl.action_setup[action_name][request_method]
-      ctrl_instance.call_setups!
-      path = File.join(ctrl_instance.view_path?, ctrl_instance.view_prefix?)
+      path, ext = view_setups_for(ctrl, action)
 
       o
       o '=== Generating "%s" view ===' % name
       if File.exists?(path)
-        File.directory?(path) || fail("#{unrootify path} should be a directory")
+        File.directory?(path) || fail('"%s" should be a directory' % unrootify(path))
       else
         o '***   Creating "%s/" ***' % unrootify(path)
         FileUtils.mkdir_p(path)
       end
-      file = File.join(path, action + ctrl_instance.engine_ext?)
+      file = File.join(path, action + ext)
       o '***   Touching "%s" ***' % unrootify(file)
       FileUtils.touch file
       file

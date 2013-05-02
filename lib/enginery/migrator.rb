@@ -59,6 +59,7 @@ module Enginery
       file = File.join(path, [context[:step], time, name, 'rb']*'.')
       write_file file, source_code
       output_source_code source_code.split("\n")
+      name
     end
 
     # convert given range or a single migration into files to be run

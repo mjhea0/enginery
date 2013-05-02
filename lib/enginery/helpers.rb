@@ -266,8 +266,7 @@ module Enginery
       name.nil? || name.empty? && fail("Please provide controller name")
 
       ctrl_path = dst_path(:controllers, class_to_route(name), '/')
-      File.directory?(ctrl_path) ||
-        fail("#{name} controller does not exists. Please create it first")
+      File.directory?(ctrl_path) || fail('"%s" controller does not exists' % name)
 
       ctrl = name.split('::').map(&:to_sym).inject(Object) do |ns,c|
         ctrl_dirname = unrootify(ctrl_path)
@@ -308,6 +307,20 @@ module Enginery
     def validate_route_name name
       name =~ /\W/ && fail("Routes may contain only alphanumerics")
       name
+    end
+
+    def view_setups_for ctrl, action
+      App.boot!
+      ctrl_instance = ctrl.new
+      ctrl_instance.respond_to?(action.to_sym) || fail('"%s" route does not exists' % action)
+      
+      action_name, request_method = deRESTify_action(action)
+      ctrl_instance.action_setup  = ctrl.action_setup[action_name][request_method]
+      ctrl_instance.call_setups!
+      [
+        File.join(ctrl_instance.view_path?, ctrl_instance.view_prefix?),
+        ctrl_instance.engine_ext?
+      ]
     end
 
     def namespace_to_source_code name
