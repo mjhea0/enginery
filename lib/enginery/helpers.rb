@@ -205,17 +205,16 @@ module Enginery
 
     def find_controllers
       Dir[dst_path(:controllers, '**/*' + CONTROLLER_SUFFIX)].inject({}) do |m,f|
-        path = f.sub(dst_path.controllers, '').sub(CONTROLLER_SUFFIX, '')
-        m.merge controller_setup_by_path(path)
-      end
+        m.merge controller_setup_by_path(f)
+      end.freeze
     end
 
     def controller_setup_by_path path
+      path.sub!(/\/+/, '/').sub!(dst_path.controllers, '').sub!(CONTROLLER_SUFFIX, '')
       name = camelize(path).sub(/\A\W+/, '')
       {name => {
         name: name,
         path: path + CONTROLLER_SUFFIX,
-        dom_id: name.gsub(/\W/m, ''),
         routes: find_routes_by_path(path)}}
     end
 
@@ -227,17 +226,16 @@ module Enginery
 
     def find_models
       Dir[dst_path(:models, '**/*' + MODEL_SUFFIX)].inject({}) do |m,f|
-        path = f.sub(dst_path.models, '').sub(MODEL_SUFFIX, '')
-        m.merge model_setup_by_path(path)
-      end
+        m.merge model_setup_by_path(f)
+      end.freeze
     end
 
     def model_setup_by_path path
+      path.sub!(/\/+/, '/').sub!(dst_path.models, '').sub!(MODEL_SUFFIX, '')
       name = camelize(path).sub(/\A\W+/, '')
       {name => {
         name: name,
         path: path + MODEL_SUFFIX,
-        dom_id: name.gsub(/\W/m, ''),
         migrations: find_migrations_by_path(path)}}
     end
 

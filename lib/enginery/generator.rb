@@ -149,7 +149,6 @@ module Enginery
 
       _, action = valid_route?(ctrl_name, name)
       _, ctrl   = valid_controller?(ctrl_name)
-
       path, ext = view_setups_for(ctrl, action)
 
       o
@@ -233,7 +232,7 @@ module Enginery
         FileUtils.mkdir_p(path)
       end
 
-      file = path + context[:action] + '_spec.rb'
+      file = path + context[:action] + SPEC_SUFFIX
       File.exists?(file) && fail('%s already exists' % unrootify(file))
       
       test_framework = setups[:test_framework] || DEFAULT_TEST_FRAMEWORK

@@ -1,6 +1,5 @@
 module Enginery
   class Delete
-
     include Helpers
     attr_reader :dst_root
 
@@ -9,19 +8,24 @@ module Enginery
     end
 
     def controller name
-      path, * = valid_controller?(name)
+      
+      controller_path, controller_object = valid_controller?(name)
 
       if File.exists?(path)
         o
-        o '*** Removing "%s" folder ***' % unrootify(path)
+        o '*** Removing "%s" folder ***' % unrootify(controller_path)
         FileUtils.rm_r(path)
       end
 
-      file = path + '_controller.rb'
+      file = controller_path + CONTROLLER_SUFFIX
       if File.exists?(file)
         o '*** Deleting "%s" file ***' % unrootify(file)
         o
         FileUtils.rm(file)
+      end
+
+      if c = controller_setup_by_path(controller_path)
+        c[:routes].each {|r| route(name, r)}
       end
     end
 
@@ -32,17 +36,31 @@ module Enginery
         o
         FileUtils.rm(file)
       end
+      view controller, name
+      spec controller, name
     end
 
     def view controller, route
       _, ctrl = valid_controller?(controller)
       path, ext = view_setups_for(ctrl, route)
       file = File.join(path, route + ext)
-      if File.exists?(file)
-        o '*** Deleting "%s" file ***' % unrootify(file)
-        o
-        FileUtils.rm(file)
-      end
+
+      return unless File.exists?(file)
+      o '*** Deleting "%s" file ***' % unrootify(file)
+      o
+      FileUtils.rm(file)
+    end
+
+    def spec controller, route
+      _, controller_object = valid_controller?(controller)
+      _, route = valid_route?(controller, route)
+
+      path = dst_path(:specs, class_to_route(controller), '/')
+      file = path + route + SPEC_SUFFIX
+      return unless File.exists?(file)
+      o '*** Deleting "%s" file ***' % unrootify(file)
+      o
+      FileUtils.rm(file)
     end
 
     def model name
@@ -54,17 +72,6 @@ module Enginery
         o
         FileUtils.rm(file)
       end
-    end
-
-    def migrations model
-      model.nil? || model.empty? && fail("Please provide model name")
-
-      path = dst_path(:migrations, class_to_route(model))
-      
-      o '*** Removing "%s" file ***' % unrootify(path)
-      o
-      FileUtils.rm_r(path)
-    
     end
 
     def migration model, name

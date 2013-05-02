@@ -13,15 +13,16 @@ if $*[0] == 'v' || $*[0] == '-v'
   exit 0
 end
 
-operation = $*[0].to_s
+root, operation = Dir.pwd, $*[0].to_s
 
 result = catch :enginery_failures do
 
-  case operation[0]
-  when 'g'
+  case
+  when operation[0] == 'g'
+
     unit = operation.sub(/\Ag(enerate)?\W?/, '')
     args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
-    generator = Enginery::Generator.new(Dir.pwd, setups)
+    generator = Enginery::Generator.new(root, setups)
 
     if args
       if unit.empty? || unit =~ /\A[p|a]/i
@@ -83,10 +84,11 @@ result = catch :enginery_failures do
       end
     end
 
-  when 'm'
+  when operation[0] == 'm'
+
     operation = operation.sub(/\Am(igrat(e)?(ion)?)?(\W+)?/, '')
     args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
-    migrator = Enginery::Migrator.new(Dir.pwd, setups)
+    migrator = Enginery::Migrator.new(root, setups)
 
     migrator.fail_unless_in_app_folder!
     migrator.load_boot_rb # loading application
@@ -116,7 +118,7 @@ result = catch :enginery_failures do
             puts
             puts '  Type Y and press enter to Continue'
             puts '  Press enter to Abort'
-            puts '  Use :yes options to get rid of this prompt - enginery:%s:yes ...' % vector
+            puts '  Use :yes options to get rid of this prompt - enginery m:%s:yes ...' % vector
             answer = STDIN.gets.strip
             files  = outstanding_files if answer.match(/\Ay/i)
           end
@@ -140,8 +142,58 @@ result = catch :enginery_failures do
 
       end
     end
+
+  when operation[0..5] == 'delete'
+
+    operation = operation.sub(/\Ad(elete)?(\W+)?/, '')
+    unit, extra = operation.scan(/(\w+)\:?(\w+)?/).flatten
+    force_run, force_yes = extra ? [extra.match(/\Af/i), extra.match(/\Ay/i)] : []
+    args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
+
+    case
+    when unit =~ /c(ontroller)?/
+      delete_meth, delete_args, required_args = :controller, args[0..0], 1
+    when unit =~ /r(oute)?/
+      delete_meth, delete_args, required_args = :route, args[0..1], 2
+    when unit =~ /v(iew)?/
+      delete_meth, delete_args, required_args = :view, args[0..1], 2
+    when unit =~ /s(pec)?/
+      delete_meth, delete_args, required_args = :view, args[0..1], 2
+    when unit =~ /mo(del)?/
+      delete_meth, delete_args, required_args = :model, args[0..0], 1
+    when unit =~ /mi(gration)?/
+      delete_meth, delete_args, required_args = :migration, args[0..1], 2
+    else
+      delete_meth = nil
+    end
+
+    if delete_meth
+      delete_args.size == required_args ||
+        Enginery::Helpers.fail('Please provide %s name' % delete_meth)
+
+      unless run = force_run || force_yes
+        puts
+        puts '  You are about to delete "%s" %s!' % [delete_args*"#", delete_meth]
+        puts
+        puts '  This action can not be undone!'
+        puts
+        puts '  Type Y and press enter to Continue'
+        puts '  Press enter to Abort'
+        puts '  Use :yes options to get rid of this prompt - enginery d:%s:yes ...' % unit
+        answer = STDIN.gets.strip
+        run = true if answer.match(/\Ay/i)
+      end
+      if run
+        puts 'GOAHEAD!'
+        delete = Enginery::Delete.new(root)
+      end
+    else
+      Enginery::Helpers.fail '--- Unknown unit "%s" ---' % unit
+    end
+
   else
-    puts "\n--- Unknown modifier %s ---\n" % operation
+    puts "\n--- Unknown modifier %s ---\n" % operation.split(':').first
+    puts "use one of g[enerate], m[igration], delete\n"
     puts Enginery.usage
   end
 end

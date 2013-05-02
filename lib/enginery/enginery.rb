@@ -23,7 +23,7 @@ module Enginery
 
   CONTROLLER_SUFFIX = '_controller.rb'.freeze
   ROUTE_SUFFIX      = '.rb'.freeze
-  SPEC_SUFFIX       = '.rb'.freeze
+  SPEC_SUFFIX       = '_spec.rb'.freeze
   MODEL_SUFFIX      = '.rb'.freeze
   MIGRATION_SUFFIX  = '.rb'.freeze
 end
