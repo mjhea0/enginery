@@ -203,6 +203,61 @@ module Enginery
 
     private
 
+    def find_controllers
+      Dir[dst_path(:controllers, '**/*' + CONTROLLER_SUFFIX)].inject({}) do |m,f|
+        path = f.sub(dst_path.controllers, '').sub(CONTROLLER_SUFFIX, '')
+        m.merge controller_setup_by_path(path)
+      end
+    end
+
+    def controller_setup_by_path path
+      name = camelize(path).sub(/\A\W+/, '')
+      {name => {
+        name: name,
+        path: path + CONTROLLER_SUFFIX,
+        dom_id: name.gsub(/\W/m, ''),
+        routes: find_routes_by_path(path)}}
+    end
+
+    def find_routes_by_path path
+      Dir[dst_path(:controllers, path, '*' + ROUTE_SUFFIX)].map do |f|
+        File.basename(f, File.extname(f))
+      end
+    end
+
+    def find_models
+      Dir[dst_path(:models, '**/*' + MODEL_SUFFIX)].inject({}) do |m,f|
+        path = f.sub(dst_path.models, '').sub(MODEL_SUFFIX, '')
+        m.merge model_setup_by_path(path)
+      end
+    end
+
+    def model_setup_by_path path
+      name = camelize(path).sub(/\A\W+/, '')
+      {name => {
+        name: name,
+        path: path + MODEL_SUFFIX,
+        dom_id: name.gsub(/\W/m, ''),
+        migrations: find_migrations_by_path(path)}}
+    end
+
+    def find_migrations_by_path path
+      Dir[dst_path(:migrations, path, '*' + MIGRATION_SUFFIX)].map do |f|
+        file = File.basename(f)
+        ([file] + file.scan(Enginery::Migrator::NAME_REGEXP).flatten)
+      end
+    end
+
+    def camelize(term, uppercase_first_letter = true) # borrowed from ActiveSupport
+      string = term.to_s
+      if uppercase_first_letter
+        string = string.sub(/^[a-z\d]*/) { $&.capitalize }
+      else
+        string = string.sub(/^(?:(?=a)b(?=\b|[A-Z_])|\w)/) { $&.downcase }
+      end
+      string.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }.gsub('/', '::')
+    end
+
     def write_file file, data
       o '***    Writing "%s" ***' % unrootify(file).gsub('::', '_')
       File.open(file, 'w') {|f| f << (data.respond_to?(:join) ? data.join : data)}

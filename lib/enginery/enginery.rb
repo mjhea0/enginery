@@ -20,4 +20,10 @@ module Enginery
   TRACKING_TABLE = :z_enginery_migrator_tracks
   TRACKING_TABLE__COLUMNS = [:migration, :performed_at, :vector].freeze
   TRACKING_TABLE__INDEXES = [:migration].freeze
+
+  CONTROLLER_SUFFIX = '_controller.rb'.freeze
+  ROUTE_SUFFIX      = '.rb'.freeze
+  SPEC_SUFFIX       = '.rb'.freeze
+  MODEL_SUFFIX      = '.rb'.freeze
+  MIGRATION_SUFFIX  = '.rb'.freeze
 end

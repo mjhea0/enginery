@@ -1,5 +1,5 @@
 module Enginery
-  class Shredder
+  class Delete
 
     include Helpers
     attr_reader :dst_root
@@ -8,7 +8,7 @@ module Enginery
       @dst_root = dst_root
     end
 
-    def delete_controller name
+    def controller name
       path, * = valid_controller?(name)
 
       if File.exists?(path)
@@ -25,7 +25,7 @@ module Enginery
       end
     end
 
-    def delete_route controller, name
+    def route controller, name
       file, * = valid_route?(controller, name)
       if File.exists?(file)
         o '*** Deleting "%s" file ***' % unrootify(file)
@@ -34,7 +34,7 @@ module Enginery
       end
     end
 
-    def delete_view controller, route
+    def view controller, route
       _, ctrl = valid_controller?(controller)
       path, ext = view_setups_for(ctrl, route)
       file = File.join(path, route + ext)
@@ -45,7 +45,7 @@ module Enginery
       end
     end
 
-    def delete_model name
+    def model name
       name.nil? || name.empty? && fail("Please provide model name")
 
       file = dst_path(:models, class_to_route(name) + '.rb')
@@ -56,7 +56,7 @@ module Enginery
       end
     end
 
-    def delete_migrations model
+    def migrations model
       model.nil? || model.empty? && fail("Please provide model name")
 
       path = dst_path(:migrations, class_to_route(model))
@@ -67,7 +67,7 @@ module Enginery
     
     end
 
-    def delete_migration model, name
+    def migration model, name
       name.nil? || name.empty? && fail("Please provide migration name")
 
       file = dst_path(:migrations, class_to_route(model), name)
