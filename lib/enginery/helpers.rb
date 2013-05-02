@@ -210,12 +210,9 @@ module Enginery
     end
 
     def controller_setup_by_path path
-      path.sub!(/\/+/, '/').sub!(dst_path.controllers, '').sub!(CONTROLLER_SUFFIX, '')
+      path = path.sub(/\/+/, '/').sub(dst_path.controllers, '').sub(CONTROLLER_SUFFIX, '')
       name = camelize(path).sub(/\A\W+/, '')
-      {name => {
-        name: name,
-        path: path + CONTROLLER_SUFFIX,
-        routes: find_routes_by_path(path)}}
+      {name => {name: name, path: path, routes: find_routes_by_path(path)}}.freeze
     end
 
     def find_routes_by_path path
@@ -231,12 +228,9 @@ module Enginery
     end
 
     def model_setup_by_path path
-      path.sub!(/\/+/, '/').sub!(dst_path.models, '').sub!(MODEL_SUFFIX, '')
+      path = path.sub(/\/+/, '/').sub(dst_path.models, '').sub(MODEL_SUFFIX, '')
       name = camelize(path).sub(/\A\W+/, '')
-      {name => {
-        name: name,
-        path: path + MODEL_SUFFIX,
-        migrations: find_migrations_by_path(path)}}
+      {name => {name: name, path: path, migrations: find_migrations_by_path(path)}}.freeze
     end
 
     def find_migrations_by_path path
@@ -318,8 +312,8 @@ module Enginery
     def valid_controller? name
       name.nil? || name.empty? && fail("Please provide controller name")
 
-      ctrl_path = dst_path(:controllers, class_to_route(name), '/')
-      File.directory?(ctrl_path) || fail('"%s" controller does not exists' % name)
+      controller = find_controllers[name] || fail('"%s" controller does not exists' % name)
+      ctrl_path  = dst_path(:controllers, controller[:path])
 
       ctrl = name.split('::').map(&:to_sym).inject(Object) do |ns,c|
         ctrl_dirname = unrootify(ctrl_path)

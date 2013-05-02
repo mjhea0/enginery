@@ -184,8 +184,9 @@ result = catch :enginery_failures do
         run = true if answer.match(/\Ay/i)
       end
       if run
-        puts 'GOAHEAD!'
         delete = Enginery::Delete.new(root)
+        delete.load_boot_rb
+        delete.send delete_meth, *delete_args
       end
     else
       Enginery::Helpers.fail '--- Unknown unit "%s" ---' % unit

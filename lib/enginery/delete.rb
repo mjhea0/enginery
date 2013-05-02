@@ -11,10 +11,10 @@ module Enginery
       
       controller_path, controller_object = valid_controller?(name)
 
-      if File.exists?(path)
+      if File.exists?(controller_path)
         o
         o '*** Removing "%s" folder ***' % unrootify(controller_path)
-        FileUtils.rm_r(path)
+        FileUtils.rm_r(controller_path)
       end
 
       file = controller_path + CONTROLLER_SUFFIX
@@ -25,7 +25,7 @@ module Enginery
       end
 
       if c = controller_setup_by_path(controller_path)
-        c[:routes].each {|r| route(name, r)}
+        (c[:routes]||[]).each {|r| route(name, r)}
       end
     end
 
