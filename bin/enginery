@@ -151,17 +151,17 @@ result = catch :enginery_failures do
     args, setups, string_setups = Enginery::Helpers.parse_input(*$*[1..-1])
 
     case
-    when unit =~ /c(ontroller)?/
+    when unit =~ /\Ac(ontroller)?/
       delete_meth, delete_args, required_args = :controller, args[0..0], 1
-    when unit =~ /r(oute)?/
+    when unit =~ /\Ar(oute)?/
       delete_meth, delete_args, required_args = :route, args[0..1], 2
-    when unit =~ /v(iew)?/
+    when unit =~ /\Av(iew)?/
       delete_meth, delete_args, required_args = :view, args[0..1], 2
-    when unit =~ /s(pec)?/
+    when unit =~ /\As(pec)?/
       delete_meth, delete_args, required_args = :view, args[0..1], 2
-    when unit =~ /mo(del)?/
+    when unit =~ /\Amo(del)?/
       delete_meth, delete_args, required_args = :model, args[0..0], 1
-    when unit =~ /mi(gration)?/
+    when unit =~ /\Ami(gration)?/
       delete_meth, delete_args, required_args = :migration, args[0..0], 1
     else
       delete_meth = nil

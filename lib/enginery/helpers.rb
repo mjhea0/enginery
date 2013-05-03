@@ -206,16 +206,11 @@ module Enginery
 
     def boot_app
       load_boot_rb
-      app.boot!
-      app
-    end
-
-    def app
-      App
+      App.boot!
     end
 
     def app_controllers
-      app.mounted_controllers.select {|c| controller_exists?(c.name)}
+      App.mounted_controllers.select {|c| controller_exists?(c.name)}
     end
 
     def routes_by_controller controller
@@ -231,21 +226,15 @@ module Enginery
 
     def app_models
       load_boot_rb
-      identity_methods = case guess_orm
-      when :ActiveRecord
-        [:connection, :columns, :reflect_on_all_associations]
-      when :DataMapper
-        [:repository, :properties, :relationships]
-      when :Sequel
-        [:model, :table_name, :where, :dataset]
-      end
+      identity_methods = ORM_IDENTITY_METHODS[Cfg[:orm].to_s.to_sym]
+      return [] unless identity_methods
       ObjectSpace.each_object(Class).select do |o|
         identity_methods.all? {|m| o.respond_to?(m)} && model_exists?(o.name)
       end
     end
 
     def model_exists? name
-      path = dst_path(:name, class_to_route(name))
+      path = dst_path(:models, class_to_route(name))
       File.file?(path + MODEL_SUFFIX) && path
     end
 
@@ -296,12 +285,6 @@ module Enginery
       end
     end
     module_function :valid_orm?
-
-    def guess_orm
-      ((@setups||{})[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
-        Please update config/config.yml by adding
-        orm: [DataMapper|ActiveRecord|Sequel]')).to_sym
-    end
 
     def valid_db_type? smth
       return unless  smth.is_a?(String) || smth.is_a?(Symbol)

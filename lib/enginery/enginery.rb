@@ -26,4 +26,10 @@ module Enginery
   SPEC_SUFFIX       = '_spec.rb'.freeze
   MODEL_SUFFIX      = '.rb'.freeze
   MIGRATION_SUFFIX  = '.rb'.freeze
+
+  ORM_IDENTITY_METHODS = {
+    ActiveRecord: [:connection, :columns, :reflect_on_all_associations].freeze,
+      DataMapper: [:repository, :properties, :relationships].freeze,
+          Sequel: [:db_schema, :columns, :dataset].freeze
+  }.freeze
 end

@@ -294,6 +294,12 @@ module Enginery
       smth.to_s.match(/(\w)(.*)/) {|m| m[1].upcase << m[2]}
     end
 
+    def guess_orm
+      (@setups[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
+        Please update config/config.yml by adding
+        orm: [DataMapper|ActiveRecord|Sequel]')).to_sym
+    end
+
     def validate_vector vector
       invalid_vector!(vector) unless vector.is_a?(String)
       (vector =~ /\Au/i) && (vector = :up)
