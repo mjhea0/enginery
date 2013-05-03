@@ -34,6 +34,13 @@ end
 desc 'Run all Migrator tests'
 task(:tm) { run(:Migrator) || fail }
 
+%w[Controller Route View Spec Model Migration].each do |unit|
+  desc('Run %s Deletion Tests' % unit)
+  task('td:' + (unit =~ /m/i ?  unit.downcase[0..1] : unit.downcase[0])) { run('Delete' + unit) || fail }
+end
+desc 'Run all Deletion tests'
+task(:td) { run(:Delete) || fail }
+
 desc 'Run all tests'
 task(:t) { run || fail }
 desc 'Run all tests, alias for "t"'

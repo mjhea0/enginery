@@ -162,7 +162,7 @@ result = catch :enginery_failures do
     when unit =~ /mo(del)?/
       delete_meth, delete_args, required_args = :model, args[0..0], 1
     when unit =~ /mi(gration)?/
-      delete_meth, delete_args, required_args = :migration, args[0..1], 2
+      delete_meth, delete_args, required_args = :migration, args[0..0], 1
     else
       delete_meth = nil
     end
@@ -196,6 +196,7 @@ result = catch :enginery_failures do
     puts "\n--- Unknown modifier %s ---\n" % operation.split(':').first
     puts "use one of g[enerate], m[igration], delete\n"
     puts Enginery.usage
+    exit 1
   end
 end
 

@@ -11,19 +11,35 @@ module Enginery
       end
       alias new_controllers new_controller
 
+      def delete_controller name
+        %x[#{BIN} delete:c:y #{name}]
+      end
+
       def new_route args
         %x[#{BIN} g:r #{args}]
       end
       alias new_routes new_route
 
+      def delete_route args
+        %x[#{BIN} delete:r:y #{args}]
+      end
+
       def new_view args
         %x[#{BIN} g:v #{args}]
+      end
+
+      def delete_view args
+        %x[#{BIN} delete:v:y #{args}]
       end
 
       def new_model args
         %x[#{BIN} g:m #{args}]
       end
       alias new_models new_model
+
+      def delete_model args
+        %x[#{BIN} delete:mo:y #{args}]
+      end
 
       def new_test args = nil
         args ? %x[rake test:#{args}] : %x[rake]
@@ -35,6 +51,10 @@ module Enginery
 
       def new_migration args
         %x[#{BIN} migration #{args}]
+      end
+
+      def delete_migration args
+        %x[#{BIN} delete:mi:y #{args}]
       end
 
       def migrate_up! args, force_run = false

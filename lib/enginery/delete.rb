@@ -10,6 +10,8 @@ module Enginery
     def controller name
       
       controller_path, controller_object = valid_controller?(name)
+      
+      routes_by_controller(name).each {|r| route(name, r)}
 
       if File.exists?(controller_path)
         o
@@ -24,9 +26,6 @@ module Enginery
         FileUtils.rm(file)
       end
 
-      if c = controller_setup_by_path(controller_path)
-        (c[:routes]||[]).each {|r| route(name, r)}
-      end
     end
 
     def route controller, name
@@ -66,26 +65,25 @@ module Enginery
     def model name
       name.nil? || name.empty? && fail("Please provide model name")
 
-      file = dst_path(:models, class_to_route(name) + '.rb')
+      file = dst_path(:models, class_to_route(name) + MODEL_SUFFIX)
       if File.exists?(file)
         o '*** Deleting "%s" file ***' % unrootify(file)
         o
         FileUtils.rm(file)
       end
+      migrations_by_model(name).each do |m|
+        migration m.split('.').first
+      end
     end
 
-    def migration model, name
+    def migration name
       name.nil? || name.empty? && fail("Please provide migration name")
-
-      file = dst_path(:migrations, class_to_route(model), name)
-      if File.exists?(file)
+      Dir[dst_path(:migrations, '**/%s.*%s' % [name, MIGRATION_SUFFIX])].each do |file|
         o '*** Deleting "%s" file ***' % unrootify(file)
         o
         FileUtils.rm(file)
       end
     end
-
-
 
   end
 end

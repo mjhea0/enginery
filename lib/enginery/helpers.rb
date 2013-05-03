@@ -193,62 +193,69 @@ module Enginery
     module_function :fail_verbosely
 
     def load_boot_rb
+      pv, $VERBOSE = $VERBOSE, nil
       orig = Array.new($:)
       # loading app
       load dst_path.boot_rb
       # for some reason, Bundler get rid of existing loadpath entries.
       # usually this will break autoloading, so storing orig paths and inserting them back
       orig.each {|p| $:.include?(p) || $: << p}
+    ensure
+      $VERBOSE = pv
     end
 
-    private
-
-    def find_controllers
-      Dir[dst_path(:controllers, '**/*' + CONTROLLER_SUFFIX)].inject({}) do |m,f|
-        m.merge controller_setup_by_path(f)
-      end.freeze
+    def boot_app
+      load_boot_rb
+      app.boot!
+      app
     end
 
-    def controller_setup_by_path path
-      path = path.sub(/\/+/, '/').sub(dst_path.controllers, '').sub(CONTROLLER_SUFFIX, '')
-      name = camelize(path).sub(/\A\W+/, '')
-      {name => {name: name, path: path, routes: find_routes_by_path(path)}}.freeze
+    def app
+      App
     end
 
-    def find_routes_by_path path
-      Dir[dst_path(:controllers, path, '*' + ROUTE_SUFFIX)].map do |f|
+    def app_controllers
+      app.mounted_controllers.select {|c| controller_exists?(c.name)}
+    end
+
+    def routes_by_controller controller
+      Dir[dst_path(:controllers, class_to_route(controller), '*' + ROUTE_SUFFIX)].map do |f|
         File.basename(f, File.extname(f))
       end
     end
 
-    def find_models
-      Dir[dst_path(:models, '**/*' + MODEL_SUFFIX)].inject({}) do |m,f|
-        m.merge model_setup_by_path(f)
-      end.freeze
+    def controller_exists? name
+      path = dst_path(:controllers, class_to_route(name))
+      File.file?(path + CONTROLLER_SUFFIX) && path
     end
 
-    def model_setup_by_path path
-      path = path.sub(/\/+/, '/').sub(dst_path.models, '').sub(MODEL_SUFFIX, '')
-      name = camelize(path).sub(/\A\W+/, '')
-      {name => {name: name, path: path, migrations: find_migrations_by_path(path)}}.freeze
-    end
-
-    def find_migrations_by_path path
-      Dir[dst_path(:migrations, path, '*' + MIGRATION_SUFFIX)].map do |f|
-        file = File.basename(f)
-        ([file] + file.scan(Enginery::Migrator::NAME_REGEXP).flatten)
+    def app_models
+      load_boot_rb
+      identity_methods = case guess_orm
+      when :ActiveRecord
+        [:connection, :columns, :reflect_on_all_associations]
+      when :DataMapper
+        [:repository, :properties, :relationships]
+      when :Sequel
+        [:model, :table_name, :where, :dataset]
+      end
+      ObjectSpace.each_object(Class).select do |o|
+        identity_methods.all? {|m| o.respond_to?(m)} && model_exists?(o.name)
       end
     end
 
-    def camelize(term, uppercase_first_letter = true) # borrowed from ActiveSupport
-      string = term.to_s
-      if uppercase_first_letter
-        string = string.sub(/^[a-z\d]*/) { $&.capitalize }
-      else
-        string = string.sub(/^(?:(?=a)b(?=\b|[A-Z_])|\w)/) { $&.downcase }
-      end
-      string.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }.gsub('/', '::')
+    def model_exists? name
+      path = dst_path(:name, class_to_route(name))
+      File.file?(path + MODEL_SUFFIX) && path
     end
+
+    def migrations_by_model model
+      Dir[dst_path(:migrations, class_to_route(model), '*' + MIGRATION_SUFFIX)].map do |f|
+        File.basename(f)
+      end
+    end
+
+    private
 
     def write_file file, data
       o '***    Writing "%s" ***' % unrootify(file).gsub('::', '_')
@@ -290,6 +297,12 @@ module Enginery
     end
     module_function :valid_orm?
 
+    def guess_orm
+      ((@setups||{})[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
+        Please update config/config.yml by adding
+        orm: [DataMapper|ActiveRecord|Sequel]')).to_sym
+    end
+
     def valid_db_type? smth
       return unless  smth.is_a?(String) || smth.is_a?(Symbol)
       case
@@ -311,9 +324,7 @@ module Enginery
 
     def valid_controller? name
       name.nil? || name.empty? && fail("Please provide controller name")
-
-      controller = find_controllers[name] || fail('"%s" controller does not exists' % name)
-      ctrl_path  = dst_path(:controllers, controller[:path])
+      ctrl_path = controller_exists?(name) || fail('"%s" controller does not exists' % name)
 
       ctrl = name.split('::').map(&:to_sym).inject(Object) do |ns,c|
         ctrl_dirname = unrootify(ctrl_path)
@@ -332,7 +343,7 @@ module Enginery
       end
       route = action_to_route(name, path_rules)
       validate_route_name(route)
-      file = ctrl_path + route + '.rb'
+      file = File.join(ctrl_path, route + '.rb')
       [file, route]
     end
 
@@ -357,7 +368,7 @@ module Enginery
     end
 
     def view_setups_for ctrl, action
-      App.boot!
+      boot_app
       ctrl_instance = ctrl.new
       ctrl_instance.respond_to?(action.to_sym) || fail('"%s" route does not exists' % action)
       
