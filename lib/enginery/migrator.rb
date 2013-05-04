@@ -25,7 +25,7 @@ module Enginery
       (name =~ /[^\w|\d|\-|\.|\:]/) && fail("Migration name can contain only alphanumerics, dashes, semicolons and dots")
       @migrations.any? {|m| m[2] == name} && fail('"%s" migration already exists' % name)
       
-      max = @migrations.max {|m| m.first}.first
+      max = (@migrations.max {|m| m.first}||[0]).first
       context = {name: name, step: max + 1}
       model   = @setups[:create_table] || @setups[:update_table]
       [:create_table, :update_table].each do |o|
