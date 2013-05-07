@@ -131,6 +131,12 @@ module Enginery
       serials_to_files(vector, *serials)
     end
 
+    def last_run file
+      create_tracking_table_if_needed
+      return unless track = track_exists?(file)
+      [track.vector, track.performed_at]
+    end
+
     private
 
     # load migration file and call corresponding methods that will run migration up/down
