@@ -1,5 +1,5 @@
 require 'rake'
-
+require 'bundler/gem_helper'
 require './test/setup'
 Dir['./test/**/test__*.rb'].each { |f| require f }
 
@@ -46,3 +46,5 @@ task(:t) { run || fail }
 desc 'Run all tests, alias for "t"'
 task test: :t
 task default: :t
+
+Bundler::GemHelper.install_tasks
