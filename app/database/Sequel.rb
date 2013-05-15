@@ -7,3 +7,4 @@ elsif Cfg.db[:type] && Cfg.db[:name]
     DB = Sequel.connect("%s://%s:%s@%s/%s" % Cfg.db.values_at(:type, :user, :pass, :host, :name))
   end
 end
+Sequel::Model.db = DB if defined?(DB)
