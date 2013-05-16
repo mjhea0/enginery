@@ -1,0 +1,22 @@
+---
+development:
+  type: mysql
+  host: localhost
+  port: 
+  name: dev__enginery
+  user: dev
+  pass: 
+test:
+  type: mysql
+  host: localhost
+  port: 
+  name: dev__enginery
+  user: dev
+  pass: 
+production:
+  type: mysql
+  host: localhost
+  port: 
+  name: dev__enginery
+  user: dev
+  pass: 

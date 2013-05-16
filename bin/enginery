@@ -42,10 +42,13 @@ result = catch :enginery_failures do
         case
         when unit =~ /\Ac(ontroller)?/
           if args.size > 1 # generate multiple controllers
-            args.each {|u| puts %x["#{$0}" g:c #{u} #{string_setups}]}
+            args.each {|c| puts %x["#{$0}" g:c #{c} #{string_setups}]}
           else
             # generating controller
             if generator.generate_controller(args[0])
+              # generating helper file
+              puts %x["#{$0}" g:h #{args[0]}]
+              
               # generating index route
               puts %x["#{$0}" g:r #{args[0]} index]
             end
@@ -56,7 +59,10 @@ result = catch :enginery_failures do
             args[1..-1].each {|u| puts %x["#{$0}" g:r #{args[0]} #{u} #{string_setups}]}
           else
             if generator.generate_route(*args)
+              # generating view file
               puts %x["#{$0}" g:v #{args[0]} #{args[1]}]
+              
+              # generating spec file
               puts %x["#{$0}" g:s #{args[0]} #{args[1]}]
             end
           end
@@ -67,6 +73,9 @@ result = catch :enginery_failures do
           else
             generator.generate_spec(*args)
           end
+
+        when unit =~ /\Ah(elper)?/
+          generator.generate_helper(*args)
 
         when unit =~ /\Av(iew)?/
           generator.generate_view(args[0], args[1])

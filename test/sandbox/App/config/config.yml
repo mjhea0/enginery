@@ -1,0 +1,10 @@
+---
+development:
+  server: Thin
+  port: 5252
+test:
+  server: Thin
+  port: 5252
+production:
+  server: Thin
+  port: 5252

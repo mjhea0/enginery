@@ -65,6 +65,7 @@ module Enginery
         source_code << "#{i + INDENT}include #{mdl}"
       end
     
+      source_code << "#{i + INDENT}include %sHelpers if defined?(%sHelpers)" % [ctrl_name, ctrl_name]
       source_code << "#{i + INDENT}# controller-wide setups"
 
       if route = setups[:route]
@@ -143,6 +144,33 @@ module Enginery
       write_file action_file, source_code.join("\n")
       output_source_code source_code
       action
+    end
+
+    def generate_helper ctrl_name
+
+      _, ctrl = valid_controller?(ctrl_name)
+      file = dst_path(:helpers, class_to_route(ctrl_name) + HELPER_SUFFIX)
+      FileUtils.mkdir_p File.dirname(file)
+
+      o
+      o '=== Generating helper file for "%s" controller ===' % ctrl_name
+      before, helper_name, after = namespace_to_source_code(ctrl_name)
+
+      source_code, i = [], INDENT * before.size
+      before.each {|s| source_code << s}
+      source_code << "#{i}module #{helper_name}Helpers"
+      
+      source_code << "#{i + INDENT}include ApplicationHelpers if defined?(ApplicationHelpers)"
+      source_code << ""
+      source_code << "#{i + INDENT}# helper methods for %s controller" % ctrl_name
+      source_code << INDENT
+      
+      source_code << "#{i}end"
+      after.each  {|s| source_code << s}
+
+      write_file file, source_code.join("\n")
+      output_source_code source_code
+      file
     end
 
     def generate_view ctrl_name, name

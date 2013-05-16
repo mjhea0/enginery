@@ -44,6 +44,7 @@ module Enginery
           :views,
           :specs,
           :migrations,
+          :helpers
         ].each {|d| paths[d] = File.join(paths[:base], d.to_s, '')}
 
         paths[:config_yml]   = File.join(paths[:config], 'config.yml')
@@ -339,8 +340,8 @@ module Enginery
 
     def validate_constant_name constant
       constant =~ /[^\w|\d|\:]/ && fail("Wrong constant name - %s, it should contain only alphanumerics" % constant)
-      constant =~ /\A[0-9]/ && fail("Wrong constant name - %s, it should start with a letter" % constant)
-      constant =~ /\A[A-Z]/ || fail("Wrong constant name - %s, it should start with a uppercase letter" % constant)
+      constant =~ /\A[0-9]/     && fail("Wrong constant name - %s, it should start with a letter" % constant)
+      constant =~ /\A[A-Z]/     || fail("Wrong constant name - %s, it should start with a uppercase letter" % constant)
       constant
     end
     module_function :validate_constant_name
@@ -365,31 +366,47 @@ module Enginery
     end
 
     def namespace_to_source_code name
-      namespace = name.split('::').map {|c| validate_constant_name c}
-      ctrl_name = namespace.pop
-      before, after = [], []
-      namespace.each do |c|
-        i = INDENT * before.size
-        before << "#{i}module %s" % c
-        after  << "#{i}end"
+      names, constants = name.split('::'), []
+      
+      names.uniq.size == names.size ||
+        fail('%s namespace constants duplicates' % name)
+
+      names.map(&:to_sym).inject(Object) do |ns,c|
+        validate_constant_name(c)
+        c_class, next_ns = Module, nil
+
+        if ns && ns.const_defined?(c)
+          next_ns = ns.const_get(c)
+          c_class = next_ns.class
+          [Class, Module].include?(c_class) ||
+            fail('%s should be a Class or a Module. It is a %s instead' % [constants.keys*'::', c_class])
+        end
+        
+        constants << [c, c_class.name.downcase]
+        next_ns
       end
-      [before, ctrl_name, after.reverse << ""]
+      
+      constant_name = constants.pop.first
+      
+      before, after = [], []
+      constants.each do |(cn,cc)|
+        i = INDENT * before.size
+        before << '%s%s %s' % [i, cc, cn]
+        after  << '%send'   % i
+      end
+      [before, constant_name, after.reverse << '']
     end
 
     def constant_defined? name
       return unless name
       namespace = name.split('::').map {|c| validate_constant_name c}
       namespace.inject(Object) do |o,c|
-        o.const_defined?(c) ? o.const_get(c) : break
+        o.const_defined?(c.to_sym) ? o.const_get(c) : break
       end
     end
 
     def output_source_code source
       (source.is_a?(String) ? File.readlines(source) : source).each {|l| o "+ " + l.chomp}
-    end
-
-    def controller_file? ctrl
-      File.exists? dst_path(:controllers, class_to_route(ctrl.name) + '_controller.rb')
     end
 
   end
