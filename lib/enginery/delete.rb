@@ -12,6 +12,7 @@ module Enginery
       controller_path, controller_object = valid_controller?(name)
       
       routes_by_controller(name).each {|r| route(name, r)}
+      helper(name)
 
       if File.exists?(controller_path)
         o
@@ -56,6 +57,15 @@ module Enginery
 
       path = dst_path(:specs, class_to_route(controller), '/')
       file = path + route + SPEC_SUFFIX
+      return unless File.exists?(file)
+      o '*** Deleting "%s" file ***' % unrootify(file)
+      o
+      FileUtils.rm(file)
+    end
+
+    def helper controller
+      _, ctrl = valid_controller?(controller)
+      file = dst_path(:helpers, class_to_route(controller) + HELPER_SUFFIX)
       return unless File.exists?(file)
       o '*** Deleting "%s" file ***' % unrootify(file)
       o

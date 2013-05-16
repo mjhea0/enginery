@@ -386,7 +386,7 @@ module Enginery
         next_ns
       end
       
-      constant_name = constants.pop.first
+      constant_name = constants.pop.first.to_s
       
       before, after = [], []
       constants.each do |(cn,cc)|
