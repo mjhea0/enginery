@@ -160,7 +160,7 @@ module Enginery
       before.each {|s| source_code << s}
       source_code << "#{i}module #{helper_name}Helpers"
       
-      source_code << "#{i + INDENT}include ApplicationHelpers if defined?(ApplicationHelpers)"
+      source_code << "#{i + INDENT}include Helpers if defined?(Helpers)"
       source_code << ""
       source_code << "#{i + INDENT}# helper methods for %s controller" % ctrl_name
       source_code << INDENT

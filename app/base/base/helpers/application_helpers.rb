@@ -1,3 +1,3 @@
-module ApplicationHelpers
+module Helpers
   
 end

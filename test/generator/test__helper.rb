@@ -17,7 +17,7 @@ module Enginery
                 is(File).file? helper_file
                 
                 Ensure 'generated helper include application helpers' do
-                  does(File.read(helper_file)) =~ /include\s+ApplicationHelpers/
+                  does(File.read(helper_file)) =~ /include\s+Helpers/
                 end
 
                 Ensure 'controller include generated helper' do
@@ -43,7 +43,7 @@ module Enginery
               is(File).file? helper_file
 
               Ensure 'generated helper include application helpers' do
-                does(File.read(helper_file)) =~ /include\s+ApplicationHelpers/
+                does(File.read(helper_file)) =~ /include\s+Helpers/
               end
             end
 
