@@ -25,6 +25,7 @@ App = E.new :automount do
 end
 
 # loading helpers
+require Cfg.helpers_path('application_helpers')
 Dir[Cfg.helpers_path('**/*.rb')].each {|f| require f}
 
 # loading models
