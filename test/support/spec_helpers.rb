@@ -50,6 +50,15 @@ module Enginery
         %x[#{BIN} delete:h:y #{args}]
       end
 
+      def new_spec args
+        %x[#{BIN} g:s #{args}]
+      end
+      alias new_specs new_spec
+
+      def delete_spec args
+        %x[#{BIN} delete:s:y #{args}]
+      end
+
       def new_test args = nil
         args ? %x[rake test:#{args}] : %x[rake]
       end

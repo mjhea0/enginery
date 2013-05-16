@@ -12,16 +12,42 @@ module Enginery
             entries = [
               'base/specs/foo/bar' + Enginery::SPEC_SUFFIX
             ]
+            Should 'be deleted alongside controller' do
+              is(new_controller 'Foo').ok?
+              is(new_route 'Foo bar').ok?
+              entries.each do |e|
+                does(File).exists? e
+              end
 
-            is(new_controller 'Foo').ok?
-            is(new_route 'Foo bar').ok?
-            entries.each do |e|
-              does(File).exists? e
+              is(delete_controller 'Foo').ok?
+              entries.each do |e|
+                refute(File).exists? e
+              end
             end
+            Should 'be deleted alongside route' do
+              is(new_controller 'Foo').ok?
+              is(new_route 'Foo bar').ok?
+              entries.each do |e|
+                does(File).exists? e
+              end
 
-            is(delete_route 'Foo bar').ok?
-            entries.each do |e|
-              refute(File).exists? e
+              is(delete_route 'Foo bar').ok?
+              entries.each do |e|
+                refute(File).exists? e
+              end
+            end
+            Should 'be deleted manually' do
+              delete_controller 'Foo'
+              is(new_controller 'Foo').ok?
+              is(new_route 'Foo bar').ok?
+              entries.each do |e|
+                does(File).exists? e
+              end
+
+              is(delete_spec 'Foo bar').ok?
+              entries.each do |e|
+                refute(File).exists? e
+              end
             end
           
           end
