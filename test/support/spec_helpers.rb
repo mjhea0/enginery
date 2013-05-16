@@ -41,6 +41,15 @@ module Enginery
         %x[#{BIN} delete:mo:y #{args}]
       end
 
+      def new_helper args
+        %x[#{BIN} g:h #{args}]
+      end
+      alias new_helpers new_helper
+
+      def delete_helper args
+        %x[#{BIN} delete:h:y #{args}]
+      end
+
       def new_test args = nil
         args ? %x[rake test:#{args}] : %x[rake]
       end

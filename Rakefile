@@ -20,7 +20,7 @@ def run unit = nil
   session.exit_code == 0
 end
 
-%w[Project Controller Route View Model Spec].each do |unit|
+%w[Project Controller Route View Model Spec Helper].each do |unit|
   desc('Run Tests for %s Generator' % unit)
   task('tg:' + unit.downcase[0]) { run(unit + 'Generator') || fail }
 end
@@ -34,7 +34,7 @@ end
 desc 'Run all Migrator tests'
 task(:tm) { run(:Migrator) || fail }
 
-%w[Controller Route View Spec Model Migration].each do |unit|
+%w[Controller Route View Spec Model Migration Helper].each do |unit|
   desc('Run %s Deletion Tests' % unit)
   task('td:' + (unit =~ /m/i ?  unit.downcase[0..1] : unit.downcase[0])) { run('Delete' + unit) || fail }
 end
