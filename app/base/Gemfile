@@ -17,8 +17,8 @@ group :production do # gems used on production
 end
 
 # gems used on any environment
-gem 'e'
-gem 'e-periphery'
+gem 'e'  # Espresso
+gem 'el' # Espresso Lungo
 gem 'thin'
 
 gem 'enginery' # needed to run migrations

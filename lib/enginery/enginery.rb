@@ -33,4 +33,5 @@ module Enginery
       DataMapper: [:repository, :properties, :relationships].freeze,
           Sequel: [:db_schema, :columns, :dataset].freeze
   }.freeze
+  EXECUTABLE = File.expand_path('../../../bin/enginery', __FILE__).freeze
 end
