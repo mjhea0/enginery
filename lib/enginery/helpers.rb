@@ -245,6 +245,12 @@ module Enginery
       end
     end
 
+    def unrootify path, root = nil
+      root = (root || dst_path.root).gsub(/\/+/, '/')
+      regexp = /\A#{Regexp.escape(root)}\/?/
+      path.gsub(/\/+/, '/').sub(regexp, '')
+    end
+
     private
 
     def write_file file, data
@@ -261,12 +267,6 @@ module Enginery
       input.scan(/:(.+)/).flatten.last
     end
     module_function :extract_setup
-
-    def unrootify path, root = nil
-      root = (root || dst_path.root).gsub(/\/+/, '/')
-      regexp = /\A#{Regexp.escape(root)}\/?/
-      path.gsub(/\/+/, '/').sub(regexp, '')
-    end
 
     def valid_server? smth
       server = smth.to_s.to_sym
