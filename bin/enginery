@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'optparse'
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'enginery'
@@ -14,6 +15,17 @@ if $*[0] == 'v' || $*[0] == '-v'
 end
 
 root, operation = Dir.pwd, $*[0].to_s
+
+OptionParser.new do |o|
+  o.on '-c', "Display controllers list" do
+    puts Enginery::Registry.new(root).controllers
+    exit 0
+  end
+  o.on '-m', "Display models list" do
+    puts Enginery::Registry.new(root).models
+    exit 0
+  end
+end.parse!
 
 result = catch :enginery_failures do
 
