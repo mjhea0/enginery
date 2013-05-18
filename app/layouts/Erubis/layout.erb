@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <%= js_tag  'application' %>
+    <%= css_tag 'application' %>
+  </head>
+  <body>
+    <div class="hero-unit text-center">
+      <h1 class="espresso-heading">
+        Welcome to Espresso World
+      </h1>
+      <h2>
+        This is your Brand New Application
+      </h2>
+      <p class="lead text-info">
+        Edit "<%= __FILE__.sub(Cfg.root_path, '') %>" to get rid of this banner
+      </p>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="span4">
+          <%= png_tag 'Espresso' %>
+        </div>
+        <div class="span8">
+          <h4 class="espresso-heading">
+            <br />
+            Running on
+            <a href="https://github.com/espresso/espresso">Espresso</a>
+            <span class="muted"> <%= EVersion::FULL %></span>
+          </h4>
+          <p class="lead">
+            <a href="http://espresso.github.io">espresso.github.io</a>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <hr />
+        <div class="span8">
+          <h4 class="espresso-heading">
+            Built with care by <a href="https://github.com/espresso/enginery">Enginery</a>
+          </h4>
+          <p class="lead">
+            <a href="https://github.com/espresso/enginery">github.com/espresso/enginery</a>
+          </p>
+        </div>
+        <div class="span4">
+          <%= png_tag 'Enginery' %>
+        </div>
+      </div>
+      
+    </div>
+  </body>
+</html>

@@ -1,13 +1,15 @@
+
 <img src="https://raw.github.com/espresso/enginery/master/logo.png" align="right">
 
-# Enginery
-
-### Stuff Builder for [Espresso Framework](https://github.com/espresso/espresso)
-
+<br>
 <p>
 <a href="https://travis-ci.org/espresso/enginery">
 <img src="https://travis-ci.org/espresso/enginery.png"></a>
 </p>
+
+# Enginery
+
+### Stuff Builder for [Espresso Framework](https://github.com/espresso/espresso)
 
 ## Install
 

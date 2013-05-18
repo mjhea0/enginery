@@ -1,0 +1,38 @@
+doctype html
+html
+  head
+    title
+    meta http-equiv="Content-Type" content="text/html; charset=UTF-8"
+    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    == js_tag  'application'
+    == css_tag 'application'
+
+  body
+    .hero-unit.text-center
+      h1.espresso-heading Welcome to Espresso World
+      h2 This is your Brand New Application
+      p.lead.text-info Edit "#{__FILE__.sub(Cfg.root_path, '')}" to get rid of this banner
+    .container
+      .row
+        .span4
+          == png_tag 'Espresso'
+        .span8
+          h4.espresso-heading
+            br
+            | Running on 
+            a href="https://github.com/espresso/espresso" Espresso
+            span.muted  #{EVersion::FULL}
+          p.lead
+            a href="http://espresso.github.io" espresso.github.io
+      .row
+        hr
+        .span8
+          h4.espresso-heading
+            | Built with care by 
+            a href="https://github.com/espresso/enginery" Enginery
+          p.lead
+            a href="https://github.com/espresso/enginery" github.com/espresso/enginery
+        .span4
+          == png_tag 'Enginery'
+
+      == yield

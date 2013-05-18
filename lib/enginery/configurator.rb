@@ -9,9 +9,19 @@ module Enginery
     end
 
     def update_config_yml
-      return if (setups = normalize_setups(@setups)).empty?
+      setups = normalize_setups(@setups)
 
       setups.delete 'db'
+
+      engine = setups['engine'] || EConstants::VIEW__DEFAULT_ENGINE_NAME
+      path = src_path(:layouts, engine)
+      if File.directory?(path)
+        Dir[path + '/*'].each {|f| FileUtils.cp(f, dst_path.views)}
+        setups['layout'] = 'layout'
+      end
+
+      return if setups.empty?
+
       yml = YAML.load File.read(dst_path.config_yml)
       ENVIRONMENTS.each do |env|
         (cfg = yml[env] || yml[env.to_s]) && cfg.update(setups)

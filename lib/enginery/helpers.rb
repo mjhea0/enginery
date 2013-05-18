@@ -19,6 +19,7 @@ module Enginery
           :specfiles,
           :database,
           :migrations,
+          :layouts,
         ].each {|d| paths[d] = File.join(paths[:root], d.to_s, '')}
         paths.values.map(&:freeze)
         [paths, Struct.new(*paths.keys).new(*paths.values)]

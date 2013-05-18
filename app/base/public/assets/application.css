@@ -1,0 +1,13 @@
+/*= require bootstrap/css/bootstrap.min */
+/*= require bootstrap/css/bootstrap-responsive.min */
+
+body {
+  color: #5a5a5a;
+}
+
+.espresso-heading {
+  font-size: 50px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -1px;
+}

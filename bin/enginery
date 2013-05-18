@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 require 'optparse'
 
+ENV['E_DEV'] && %w[
+  e el
+].each {|g| $:.unshift(File.expand_path('../../../%s/lib' % g, __FILE__))}
+
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'enginery'
 require 'enginery/usage'
