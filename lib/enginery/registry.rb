@@ -10,12 +10,13 @@ module Enginery
       boot_app
       app_controllers.inject({}) do |f,c|
         path   = EUtils.class_to_route(c.name)
-        routes = routes_by_controller(c.name).inject({}) do |f,c|
-          f.merge c => {
-            name: c,
-            file: unrootify(dst_path(:controllers, path, c + ROUTE_SUFFIX)),
-            views: Dir[dst_path(:views, path, c + '.*')].map {|f| unrootify(f)},
-            specs: Dir[dst_path(:specs, path, c + SPEC_SUFFIX)].map {|f| unrootify(f)}
+        routes = routes_by_controller(c.name).inject({}) do |f,r|
+          f.merge r => {
+            name: r,
+            route: c[r.to_sym],
+            file: unrootify(dst_path(:controllers, path, r + ROUTE_SUFFIX)),
+            views: Dir[dst_path(:views, path, r + '.*')].map {|f| unrootify(f)},
+            specs: Dir[dst_path(:specs, path, r + SPEC_SUFFIX)].map {|f| unrootify(f)}
           }
         end
         data = {
