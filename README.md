@@ -269,7 +269,6 @@ enginery g s:Unicorn p:2000 h:192.168.2.5
 ```
 
 
-
 ### Format
 
 Enginery also allow to specify [format](https://github.com/espresso/espresso/blob/master/docs/Routing.md#format) to be used by all controllers / actions.
@@ -402,6 +401,16 @@ module Foo < E
 end
 ```
 
+### Deleting Controllers
+
+As easy as:
+
+```bash
+$ enginery delete:c ControllerName
+```
+
+This will remove all controller routes, views, specs and helpers, so use with care.
+
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
@@ -463,7 +472,18 @@ this will create 3 routes and 3 views.
 
 **Worth to note** that any provided setups will apply on all and only generated actions.
 
+### Deleting Routes
+
+As easy as:
+
+```bash
+$ enginery delete:r ControllerName route_name
+```
+
+This will remove all route files, views and specs, so use with care.
+
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
+
 
 ## Specs
 
@@ -506,6 +526,7 @@ To see all available specs use `$ rake -D`
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
+
 ## Views
 
 View generator are triggered every time you generate a route, so it make sense to use it only to create a template that was accidentally damaged/lost.
@@ -525,6 +546,7 @@ If template already exists, the generator will simply touch it, without modifyin
 
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
+
 
 ## Models
 
@@ -625,6 +647,14 @@ module Foo < ActiveRecord::Base
   include Bar
   # ...
 end
+```
+
+### Deleting Models
+
+As easy as:
+
+```bash
+$ enginery delete:m ModelName
 ```
 
 
@@ -864,7 +894,6 @@ Use `$ rake -D` to list all tasks.
 
 **Note on renaming columns:** as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. Master branch have it [fixed](https://github.com/datamapper/dm-migrations/blob/8bfcec08286a12ceee1bc3e5a01da3b5b7d4a74d/lib/dm-migrations/sql/table_modifier.rb#L35) but not yet released.
 
-
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
 
 ## Contributing
@@ -890,4 +919,3 @@ Use `$ rake -D` to list all tasks.
 </p>
 
 ### Author - [Silviu Rusu](https://github.com/slivu).  License - [MIT](https://github.com/espresso/espresso/blob/master/LICENSE).
-
