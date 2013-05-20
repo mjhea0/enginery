@@ -26,8 +26,9 @@ module Enginery
       @migrations.any? {|m| m[2] == name} && fail('"%s" migration already exists' % name)
       
       max = (@migrations.max {|m| m.first}||[0]).first
-      context = {name: name, step: max + 1}
-      model   = @setups[:create_table] || @setups[:update_table]
+      model = @setups[:create_table] || @setups[:update_table]
+      context = {model: model, name: name, step: max + 1}
+
       [:create_table, :update_table].each do |o|
         context[o] = (m = constant_defined?(@setups[o])) ? model_to_table(m) : nil
       end
@@ -44,11 +45,10 @@ module Enginery
         fail('No model provided or provided one does not exists!')
       end
 
-      update_model_file(model, context)
       handle_transitions(table, columns)
-
       engine = Tenjin::Engine.new(path: [src_path.migrations], cache: false)
-      source_code = engine.render("#{guess_orm}.erb", context)
+      source_code = engine.render('%s.erb' % guess_orm, context.merge(context: context))
+
       o
       o '--- %s model - generating "%s" migration ---' % [model, name]
       o
@@ -151,6 +151,15 @@ module Enginery
 
         case orm
         when :DataMapper
+
+          update_model_file(MigratorContext)
+
+          mj, mn, pt = DataMapper::VERSION.scan(/\d+/).map(&:to_i)
+          if MigratorContext[:rename_columns].any? && [1,2,0] == [mj,mn,pt]
+            o '    status: Skipped as renaming columns is broken on DataMapper 1.2.0'
+            return false
+          end
+
           MigratorInstance.instance_exec do
             # when using perform_up/down DataMapper will create a tracking table
             # and decide whether migration should be run, based on needs_up? and needs_down?
@@ -173,8 +182,8 @@ module Enginery
       end
     end
 
-    def update_model_file model, context
-      return unless guess_orm == :DataMapper
+    def update_model_file context
+      model = context[:model]
       file = dst_path(:models, class_to_route(model) + '.rb')
       return unless File.file?(file)
 

@@ -99,7 +99,6 @@ module Enginery
 
       def skipped? output
         output =~ /skip/i
-        output =~ /already performed/i
       end
       
       def cleanup

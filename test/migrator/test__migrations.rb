@@ -66,25 +66,26 @@ module Enginery
                   # running this test only on DataMapper
                   model_file = 'base/models/a.rb'
 
-                  Ensure 'foo property does not exists' do
-                    refute(File.read(model_file)) =~ /property\W+foo/
-                  end
-
                   Ensure 'foo property added with new migration' do
                     is(new_migration("addFoo model:A column:foo")).ok?
+                    Ensure 'foo property does not exists' do
+                      refute(File.read(model_file)) =~ /property\W+foo/
+                    end
+                    is(migrate_up! 4).ok?
                     does(File.read(model_file)) =~ /property\W+foo/
 
-                    Ensure 'foo property renamed to bar with new migration' do
+                    Should 'change property type with new migration' do
+                      does(File.read(model_file)) =~ /property\W+foo\W+String/
+                      is(new_migration("updateBAR model:A update_column:foo:text")).ok?
+                      is(migrate_up! 5).ok?
+                      refute(File.read(model_file)) =~ /property\W+foo\W+String/
+                      does(File.read(model_file)) =~ /property\W+foo\W+Text/
+                    end
+                    Should 'rename foo to bar with new migration' do
                       is(new_migration("fooTObar model:A rename_column:foo:bar")).ok?
+                      is(migrate_up! 6).ok?
                       refute(File.read(model_file)) =~ /property\W+foo/
                       does(File.read(model_file)) =~ /property\W+bar/
-
-                      Should 'change property type with new migration' do
-                        does(File.read(model_file)) =~ /property\W+bar\W+String/
-                        is(new_migration("updateBAR model:A update_column:bar:text")).ok?
-                        refute(File.read(model_file)) =~ /property\W+bar\W+String/
-                        does(File.read(model_file)) =~ /property\W+bar\W+Text/
-                      end
                     end
                   end
                   
