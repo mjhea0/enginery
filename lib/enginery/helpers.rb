@@ -400,7 +400,7 @@ module Enginery
 
     def constant_defined? name
       return unless name
-      namespace = name.to_s.strip.sub('::', '').split('::').map {|c| validate_constant_name c}
+      namespace = name.to_s.strip.sub(/\A::/, '').split('::').map {|c| validate_constant_name c}
       namespace.inject(Object) do |o,c|
         o.const_defined?(c.to_sym) ? o.const_get(c) : break
       end
