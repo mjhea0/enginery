@@ -3,11 +3,11 @@ module Enginery
     include Helpers
 
     TIME_FORMAT = '%Y-%m-%d_%H-%M-%S'.freeze
-    NAME_REGEXP = /\A(\d+)\.(\d+\-\d+\-\d+_\d+\-\d+\-\d+)\.(.*)\.rb\Z/.freeze
+    NAME_REGEXP = /\A(\d+)\.(\d+\-\d+\-\d+_\d+\-\d+\-\d+)\.(.*)#{Regexp.escape MIGRATION_SUFFIX}\Z/.freeze
 
     def initialize dst_root, setups = {}
       @dst_root, @setups = dst_root, setups
-      @migrations = Dir[dst_path(:migrations, '**/*.rb')].inject([]) do |map,f|
+      @migrations = Dir[dst_path(:migrations, '**/*%s' % MIGRATION_SUFFIX)].inject([]) do |map,f|
         step, time, name = File.basename(f).scan(NAME_REGEXP).flatten
         step && time && name && map << [step.to_i, time, name, f.sub(dst_path.migrations, '')]
         map
@@ -184,7 +184,7 @@ module Enginery
 
     def update_model_file context
       model = context[:model]
-      file = dst_path(:models, class_to_route(model) + '.rb')
+      file = dst_path(:models, class_to_route(model) + MODEL_SUFFIX)
       return unless File.file?(file)
 
       lines, properties = File.readlines(file), []
