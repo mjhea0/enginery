@@ -32,9 +32,16 @@ module Enginery
       [:create_table, :update_table].each do |o|
         context[o] = (m = constant_defined?(@setups[o])) ? model_to_table(m) : nil
       end
-      [:create_columns, :update_columns].each do |o|
-        context[o] = (@setups[o]||[]).map {|(n,t)| [n, opted_column_type(t)]}
+
+      context[:create_columns] = (@setups[:create_columns]||[]).map do |(n,t)|
+        [n, opted_column_type(t)]
       end
+
+      context[:update_columns] = (@setups[:update_columns]||[]).map do |(n,ct,nt)|
+        ct && nt || fail('Please provide both current and new types - u:column_name:current_type:new_type')
+        [n, opted_column_type(nt), opted_column_type(ct)]
+      end
+
       context[:rename_columns] = @setups[:rename_columns]||[]
 
       if table = context[:create_table]
@@ -45,7 +52,6 @@ module Enginery
         fail('No model provided or provided one does not exists!')
       end
 
-      handle_transitions(table, columns)
       engine = Tenjin::Engine.new(path: [src_path.migrations], cache: false)
       source_code = engine.render('%s.erb' % guess_orm, context.merge(context: context))
 
@@ -152,7 +158,7 @@ module Enginery
         case orm
         when :DataMapper
 
-          update_model_file(MigratorContext)
+          update_model_file(MigratorContext, vector)
 
           mj, mn, pt = DataMapper::VERSION.scan(/\d+/).map(&:to_i)
           if MigratorContext[:rename_columns].any? && [1,2,0] == [mj,mn,pt]
@@ -182,7 +188,7 @@ module Enginery
       end
     end
 
-    def update_model_file context
+    def update_model_file context, vector
       model = context[:model]
       file = dst_path(:models, class_to_route(model) + MODEL_SUFFIX)
       return unless File.file?(file)
@@ -193,9 +199,44 @@ module Enginery
         properties << (property << i) if property[1] && property[2]
       end
       return if properties.empty?
-      property_setup = nil
-      
-      new_properties = []
+
+      new_lines = case vector.to_s.downcase.to_sym
+      when :up
+         add_properties(lines, properties, context)
+      when :down
+        remove_properties(lines, properties, context)
+      end
+
+      return unless new_lines
+      File.open(file, 'w') {|f| f << new_lines.join}
+    end
+
+    def remove_properties lines, properties, context
+      property = nil
+
+      context[:create_columns].each do |(n)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        lines[property.last] = nil
+      end
+
+      context[:rename_columns].each do |(cn,nn)|
+        next unless property = properties.find {|p| p[1].to_s == nn.to_s}
+        property[1] = cn
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property
+      end
+
+      context[:update_columns].each do |(n,nt,ot)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        property[2] = ot.to_s.split('::').last
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property
+      end
+
+      property ? lines : nil
+    end
+
+    def add_properties lines, properties, context
+      property_setup, new_properties = nil, []
+
       context[:create_columns].each do |(n,t)|
         next if properties.find {|p| p[1].to_s == n.to_s}
         property_setup = [properties.last.first, n, t.to_s.split('::').last]
@@ -216,19 +257,8 @@ module Enginery
         property_setup = [*property[0..1], t.to_s.split('::').last, property[3]]
         lines[property.last] = "%sproperty :%s, %s%s\n" % property_setup
       end
-      return unless property_setup
-      File.open(file, 'w') {|f| f << lines.join}
-    end
 
-    def handle_transitions table, columns
-      transitions_file = dst_path(:migrations, 'transitions.yml')
-      transitions = File.file?(transitions_file) ? (YAML.load(File.read(transitions_file)) rescue {}) : {}
-      transitions[table] ||= {}
-      columns.each do |column|
-        column << transitions[table][column.first]
-        transitions[table][column.first] = column[1]
-      end
-      File.open(transitions_file, 'w') {|f| f << YAML.dump(transitions)}
+      property_setup ? lines : nil
     end
 
     def create_tracking_table_if_needed
@@ -295,8 +325,7 @@ module Enginery
       type ||= default_column_type(orm)
       case orm
       when :DataMapper
-        constant_name = 'DataMapper::Property::%s' % capitalize(type)
-        constant_defined?(constant_name) || ("'%s'" % type)
+          'DataMapper::Property::%s' % capitalize(type)
       when :Sequel
         type.to_s =~ /text/i ? "String, text: true" : capitalize(type)
       else

@@ -21,7 +21,7 @@ module Enginery
         end
         <?rb end ?>
 
-        <?rb @rename_columns.each do |(n,nn)|?>
+        <?rb @rename_columns.each do |(n,nn)| ?>
         rename_column :#{ @update_table }, :#{ n }, :#{ nn }
         <?rb end ?>
       end
@@ -35,17 +35,21 @@ module Enginery
           drop_column :#{ n }
         <?rb end ?>
         <?rb if (update_columns = @update_columns.select {|n,t,ct| ct}).any?
-        update_columns.each do |(n,t,ct)|?>
+        update_columns.each do |(n,t,ct)| ?>
           set_column_type :#{ n }, #{ ct }
         <?rb end
         end ?>
         end
         <?rb end ?>
 
-        <?rb @rename_columns.each do |(n,nn)|?>
+        <?rb @rename_columns.each do |(n,nn)| ?>
         rename_column :#{ @update_table }, :#{ nn }, :#{ n }
         <?rb end ?>
       end
     end
+
+    # *** do not remove this ***
+    MigratorContext = #{@context}
+
   end
 end

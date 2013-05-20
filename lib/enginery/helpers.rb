@@ -157,12 +157,12 @@ module Enginery
             (setups[:create_columns] ||= []).push column.split(':')
             string_setups << a
           end
-        when a =~ /\Au(pdate_)?c(olumn)?:/
+        when a =~ /\Au(pdate_)?c?(olumn)?:/
           if column = extract_setup(a)
             (setups[:update_columns] ||= []).push column.split(':')
             string_setups << a
           end
-        when a =~ /\Ar(ename_)?c(olumn)?:/
+        when a =~ /\Ar(ename_)?c?(olumn)?:/
           if column = extract_setup(a)
             (setups[:rename_columns] ||= []).push column.split(':')
             string_setups << a
@@ -400,7 +400,7 @@ module Enginery
 
     def constant_defined? name
       return unless name
-      namespace = name.split('::').map {|c| validate_constant_name c}
+      namespace = name.to_s.strip.sub('::', '').split('::').map {|c| validate_constant_name c}
       namespace.inject(Object) do |o,c|
         o.const_defined?(c.to_sym) ? o.const_get(c) : break
       end

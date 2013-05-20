@@ -14,7 +14,7 @@ def run unit = nil
     cleanup
   end
   puts "\n***\nTesting %s ..." % (unit ? unit : :everything)
-  session.run %r[#{unit}]
+  puts session.run %r[#{unit}]
   puts session.failures if session.failed?
   puts session.summary
   session.exit_code == 0
