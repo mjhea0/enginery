@@ -46,7 +46,7 @@ module Enginery
                         check(table('as')).has_column('email',  :string)
 
                         Ensure '"up" is changing "email" type to "text"' do
-                          is(new_migration("chEmail model:A update_column:email:string:text")).ok?
+                          is(new_migration("chEmail model:A update_column:email:text")).ok?
 
                           is(migrate_up! 3).ok?
                           check(table('as')).has_column('email',  :text)
@@ -76,7 +76,7 @@ module Enginery
 
                     Should 'change property type with new migration' do
                       does(File.read(model_file)) =~ /property\W+foo\W+String/
-                      is(new_migration("updateBAR model:A update_column:foo:string:text")).ok?
+                      is(new_migration("updateBAR model:A update_column:foo:text")).ok?
                       is(migrate_up! 5).ok?
                       refute(File.read(model_file)) =~ /property\W+foo\W+String/
                       does(File.read(model_file)) =~ /property\W+foo\W+Text/

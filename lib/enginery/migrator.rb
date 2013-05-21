@@ -32,25 +32,13 @@ module Enginery
       [:create_table, :update_table].each do |o|
         context[o] = (m = constant_defined?(@setups[o])) ? model_to_table(m) : nil
       end
-
-      context[:create_columns] = (@setups[:create_columns]||[]).map do |(n,t)|
-        [n, opted_column_type(t)]
-      end
-
-      context[:update_columns] = (@setups[:update_columns]||[]).map do |(n,ct,nt)|
-        ct && nt || fail('Please provide both current and new types - u:column_name:current_type:new_type')
-        [n, opted_column_type(nt), opted_column_type(ct)]
-      end
-
-      context[:rename_columns] = @setups[:rename_columns]||[]
-
-      if table = context[:create_table]
-        columns = context[:create_columns]
-      elsif table = context[:update_table]
-        columns = (cc = context[:create_columns]).any? ? cc : context[:update_columns]
-      else
+      table = context[:create_table] || context[:update_table] ||
         fail('No model provided or provided one does not exists!')
+
+      [:create_columns, :update_columns].each do |o|
+        context[o] = transitions(table, (@setups[o]||[]).map {|(n,t)| [n, opted_column_type(t)]})
       end
+      context[:rename_columns] = @setups[:rename_columns]||[]
 
       engine = Tenjin::Engine.new(path: [src_path.migrations], cache: false)
       source_code = engine.render('%s.erb' % guess_orm, context.merge(context: context))
@@ -362,6 +350,18 @@ module Enginery
       ident_size = 20 - string.size
       ident_size =  0 if ident_size < 0
       INDENT + ' '*ident_size + string
+    end
+
+    def transitions table, columns
+      transitions_file = dst_path(:migrations, 'transitions.yml')
+      transitions = File.file?(transitions_file) ? (YAML.load(File.read(transitions_file)) rescue {}) : {}
+      transitions[table] ||= {}
+      columns.each do |column|
+        column[2] = transitions[table][column.first]
+        transitions[table][column.first] = column[1]
+      end
+      File.open(transitions_file, 'w') {|f| f << YAML.dump(transitions)}
+      columns
     end
 
   end
