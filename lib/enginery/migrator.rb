@@ -167,7 +167,8 @@ module Enginery
         when :ActiveRecord
           MigratorInstance.new.send vector
         when :Sequel
-          MigratorInstance.apply DB, vector
+          model = constant_defined?(MigratorContext[:model])
+          MigratorInstance.apply model.db, vector
         end
         o '    status: OK'
         true
@@ -257,7 +258,7 @@ module Enginery
       when :ActiveRecord
         TracksMigrator.new.up
       when :Sequel
-        TracksMigrator.apply DB, :up
+        TracksMigrator.apply Sequel::Model.db, :up
       end
     end
 
