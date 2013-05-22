@@ -86,13 +86,6 @@ module Enginery
     end
 
     def update_boot_rb
-      if (orm = @setups[:orm]) && (orm == :DataMapper)
-        return if File.read(dst_path.boot_rb) =~ /DataMapper\.finalize/
-        source_code = ['', 'DataMapper.finalize', '']
-        o
-        update_file dst_path.boot_rb, source_code
-        output_source_code(source_code)
-      end
     end
 
     def update_database_rb

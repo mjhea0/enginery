@@ -72,8 +72,9 @@ module Enginery
 
     # TODO: refactor this huge method
     def parse_input *input
+      input.flatten!
       args, setups, string_setups = [], {}, []
-      input.flatten.each do |a|
+      input.each do |a|
         case
 
         # generator
@@ -168,7 +169,14 @@ module Enginery
             string_setups << a
           end
         else
-          args << a
+          args.push(a) unless ORM_ASSOCIATIONS.find {|an| a =~ /#{an}/}
+        end
+      end
+      ORM_ASSOCIATIONS.each do |a|
+        input.select {|x| x =~ /\A#{a}:/}.each do |s|
+          next unless v = extract_setup(s)
+          (setups[a] ||= []).push v
+          string_setups << s
         end
       end
       [args.freeze, setups.freeze, string_setups.join(' ').freeze]

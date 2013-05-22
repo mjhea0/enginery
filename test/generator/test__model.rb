@@ -4,19 +4,15 @@ module Enginery
       Spec.new self do
 
         Dir.chdir DST_ROOT do
-          Testing do
-
+          Should 'generate a plain class cause no setups given' do
             is(new_app 'App').ok?
 
             Dir.chdir 'App' do
+              is(new_model 'Foo').ok?
 
-              Should 'generate a plain class cause no setups given' do
-                is(new_model 'Foo').ok?
-
-                file = 'base/models/foo.rb'
-                is(File).file? file
-                expect(File.read file) =~ /class\s+Foo\n/
-              end
+              file = 'base/models/foo.rb'
+              is(File).file? file
+              expect(File.read file) =~ /class\s+Foo\n/
 
               Should 'correctly handle namespaces' do
                 is(new_model 'A::B::C').ok?
@@ -45,37 +41,156 @@ module Enginery
               does(source_code) =~ /class\s+Foo/
               does(source_code) =~ /include\s+DataMapper/
 
-              Should 'include modules provided via include: option' do
-                is(new_model 'Bar i:Rack::Utils').ok?
+              Should 'generate multiple models' do
+                
+                are(new_models 'Bar Baz X::Y::Z').ok?
 
-                file = 'base/models/bar.rb'
+                %w[Bar Baz].each do |c|
+                  file = "base/models/#{c.downcase}.rb"
+                  is(File).file? file
+                  expect {File.read file} =~ /class #{c}/i
+                end
+
+                And 'yet behave well with namespaces' do
+                  file = "base/models/x/y/z.rb"
+                  is(File).file? file
+                  expect {File.read file} =~ /class Z/i
+                end
+             
+              end
+
+              
+
+              Should 'include modules provided via include: option' do
+                is(new_model 'BarBaz i:Rack::Utils').ok?
+
+                file = 'base/models/bar_baz.rb'
                 is(File).file? file
                 does(File.read file) =~ /include Rack::Utils/
               end
+
             end
           end
           cleanup
 
-          Should 'create multiple models' do
-            is(new_app 'App o:ar').ok?
-            
+          Should 'correctly handle ActiveRecord associations' do
+            is(new_app 'App orm:ar').ok?
+
             Dir.chdir 'App' do
-              are(new_models 'A B C  X::Y::Z').ok?
+              model_file = "base/models/foo.rb"
 
-              %w[a b c].each do |c|
-                file = "base/models/#{c}.rb"
-                is(File).file? file
-                expect {File.read file} =~ /class #{c} < ActiveRecord/i
-              end
+              is(new_model 'Foo belongs_to:bar').ok?
+              does(model_file).contain? /belongs_to\W+bar/
+              is(delete_model 'Foo').ok?
 
-              And 'yet behave well with namespaces' do
-                file = "base/models/x/y/z.rb"
-                is(File).file? file
-                expect {File.read file} =~ /class Z < ActiveRecord/i
+              is(new_model 'Foo has_one:bar').ok?
+              does(model_file).contain? /has_one\W+bar/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_one:bar:through:baz').ok?
+              does(model_file).contain? /has_one\W+bar\W+through\W+baz/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_many:bars').ok?
+              does(model_file).contain? /has_many\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_many:bars:through:baz').ok?
+              does(model_file).contain? /has_many\W+bars\W+through\W+baz/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_and_belongs_to_many:bars').ok?
+              does(model_file).contain? /has_and_belongs_to_many\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              Should 'handle multiple associations' do
+                is(new_model 'Foo belongs_to:bar belongs_to:baz has_many:related_bars').ok?
+                does(model_file).contain? /belongs_to\W+bar/
+                does(model_file).contain? /belongs_to\W+baz/
+                does(model_file).contain? /has_many\W+related_bars/
+                is(delete_model 'Foo').ok?
               end
             end
           end
           cleanup
+
+          Should 'correctly handle DataMapper associations' do
+            is(new_app 'App orm:dm').ok?
+
+            Dir.chdir 'App' do
+              model_file = "base/models/foo.rb"
+
+              is(new_model 'Foo belongs_to:bar').ok?
+              does(model_file).contain? /belongs_to\W+bar/
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_one:bar').ok?
+              does(model_file).contain? /has\s+1\W+bar/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_one:bar:through:baz').ok?
+              does(model_file).contain? /has\s+1\W+bar\W+through\W+baz/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_many:bars').ok?
+              does(model_file).contain? /has\s+n\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_many:bars:through:baz').ok?
+              does(model_file).contain? /has\s+n\W+bars\W+through\W+baz/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_and_belongs_to_many:bars').ok?
+              does(model_file).contain? /has\s+n\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              Should 'handle multiple associations' do
+                is(new_model 'Foo belongs_to:bar has_many:related_bars').ok?
+                does(model_file).contain? /belongs_to\W+bar/
+                does(model_file).contain? /has\s+n\W+related_bars/
+                is(delete_model 'Foo').ok?
+
+                is(new_model 'Foo has_many:related_bars has_many:bars:through:related_bars').ok?
+                does(model_file).contain? /has\s+n\W+related_bars/
+                does(model_file).contain? /has\s+n\W+bars\W+through\W+related_bars/
+                is(delete_model 'Foo').ok?
+              end
+            end
+          end
+          cleanup
+
+          Should 'correctly handle Sequel associations' do
+            is(new_app 'App orm:sq').ok?
+
+            Dir.chdir 'App' do
+              model_file = "base/models/foo.rb"
+
+              is(new_model 'Foo belongs_to:bar').ok?
+              does(model_file).contain? /many_to_one\W+bar/
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_one:bar').ok?
+              does(model_file).contain? /one_to_one\W+bar/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_many:bars').ok?
+              does(model_file).contain? /one_to_many\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              is(new_model 'Foo has_and_belongs_to_many:bars').ok?
+              does(model_file).contain? /many_to_many\W+bars/i
+              is(delete_model 'Foo').ok?
+
+              Should 'handle multiple associations' do
+                is(new_model 'Foo belongs_to:bar has_many:related_bars').ok?
+                does(model_file).contain? /many_to_one\W+bar/
+                does(model_file).contain? /one_to_many\W+related_bars/
+                is(delete_model 'Foo').ok?
+              end
+            end
+          end
+          cleanup
+
         end
       end
     end

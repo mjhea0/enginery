@@ -84,6 +84,7 @@ module Enginery
       migrations_by_model(name).each do |m|
         migration m.split('.').first
       end
+      true
     end
 
     def migration name

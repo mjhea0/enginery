@@ -133,6 +133,11 @@ module Enginery
         is( column(table, column) ).nil?
       end
 
+      def contain? file, regexp
+        is(File).file? file
+        expect {File.read file} =~ regexp
+      end
+
     end
   end
 end

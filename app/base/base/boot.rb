@@ -23,6 +23,8 @@ App = E.new :automount do
     use Rack::CommonLogger
     use Rack::ShowExceptions
   end
+
+  DataMapper.finalize if Cfg[:orm].to_s =~ /\Ad/i
 end
 
 # loading helpers

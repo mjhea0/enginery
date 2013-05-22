@@ -147,13 +147,27 @@ module Enginery
     end
 
     def generate_helper ctrl_name
+      o
+      o '=== Generating helper file for "%s" controller ===' % ctrl_name
 
       _, ctrl = valid_controller?(ctrl_name)
       file = dst_path(:helpers, class_to_route(ctrl_name) + HELPER_SUFFIX)
-      FileUtils.mkdir_p File.dirname(file)
+      path = File.dirname(file)
 
-      o
-      o '=== Generating helper file for "%s" controller ===' % ctrl_name
+      if File.exists?(path)
+        File.directory?(path) || fail('"%s" should be a directory' % unrootify(path))
+      else
+        o '***   Creating "%s/" ***' % unrootify(path)
+        FileUtils.mkdir_p(path)
+      end
+
+      if File.exists?(file)
+        File.file?(file) || fail('"%s" should be a file' % unrootify(file))
+        o('*** WARN: overwriting "%s" file ***' % unrootify(file))
+      else
+        o '***   Creating "%s" ***' % unrootify(file)
+      end
+
       before, helper_name, after = namespace_to_source_code(ctrl_name)
 
       source_code, i = [], INDENT * before.size
@@ -188,8 +202,13 @@ module Enginery
         FileUtils.mkdir_p(path)
       end
       file = File.join(path, action + ext)
-      o '***   Touching "%s" ***' % unrootify(file)
-      FileUtils.touch file
+      if File.exists?(file)
+        File.file?(file) || fail('"%s" should be a file' % unrootify(file))
+        o('*** WARN: overwriting "%s" file ***' % unrootify(file))
+      else
+        o '***   Creating "%s" ***' % unrootify(file)
+      end
+      File.open(file, 'w') {}
       file
     end
 
@@ -210,6 +229,10 @@ module Enginery
         insertions << ''
 
         orm == :DataMapper && insertions << 'property :id, Serial'
+        insertions << ''
+        send(orm.to_s.downcase + '_associations').each do |a|
+          insertions << a
+        end
       end
       insertions << ''
 
@@ -261,7 +284,7 @@ module Enginery
       end
 
       file = path + context[:action] + SPEC_SUFFIX
-      File.exists?(file) && fail('%s already exists' % unrootify(file))
+      File.exists?(file) && o('*** WARN: overwriting "%s" file ***' % unrootify(file))
       
       test_framework = setups[:test_framework] || DEFAULT_TEST_FRAMEWORK
       engine = Tenjin::Engine.new(path: [src_path.specfiles], cache: false)
@@ -270,6 +293,89 @@ module Enginery
       write_file file, source_code
       output_source_code source_code.split("\n")
       file
+    end
+
+    private
+    def activerecord_associations
+      ORM_ASSOCIATIONS.inject([]) do |lines,a|
+        (@setups[a]||[]).each do |s|
+          line, input = nil, s.split(':')
+          target = input[0]
+          if target =~ /\W/
+            o '*** WARN: invalid association target "%s", association not added ***' % target
+          else
+            line = '%s :%s' % [a, target]
+            if through = input[1].to_s =~ /through/ && input[2]
+              if through =~ /\W/
+                o '*** WARN: invalid :through option "%s", association not added ***' % through
+                line = nil
+              else
+                line << ', through: :%s' % through
+              end
+            end
+          end
+          lines.push(line) if line
+        end
+        lines
+      end
+    end
+
+    def datamapper_associations
+      ORM_ASSOCIATIONS.inject([]) do |lines,a|
+        (@setups[a]||[]).each do |s|
+          line, input = nil, s.split(':')
+          target = input[0]
+          if target =~ /\W/
+            o '*** WARN: invalid association target "%s", association not added ***' % target
+          else
+            if a == :has_one
+              line = 'has 1, :%s' % target
+            elsif a =~ /has_(and|many)/
+              line = 'has n, :%s' % target
+            else
+              line = '%s :%s' % [a, target]
+            end
+            if through = input[1].to_s =~ /through/ && input[2]
+              if through =~ /\W/
+                o '*** WARN: invalid :through option "%s", association not added ***' % through
+                line = nil
+              else
+                line << ', through: :%s' % through
+              end
+            end
+          end
+          lines.push(line) if line
+        end
+        lines
+      end
+    end
+
+    def sequel_associations
+      ORM_ASSOCIATIONS.inject([]) do |lines,a|
+        (@setups[a]||[]).each do |s|
+          line, input = nil, s.split(':')
+          target = input[0]
+          if target =~ /\W/
+            o '*** WARN: invalid association target "%s", association not added ***' % target
+          else
+            case a
+            when :belongs_to
+              line = 'many_to_one :%s' % target
+            when :has_one
+              line = 'one_to_one :%s' % target
+            when :has_many
+              line = 'one_to_many :%s' % target
+            when :has_and_belongs_to_many
+              line = 'many_to_many :%s' % target
+            end
+            if through = input[1].to_s =~ /through/ && input[2]
+              o '*** INFO: Sequel does not support :through option, ignoring ***' % through
+            end
+          end
+          lines.push(line) if line
+        end
+        lines
+      end
     end
 
   end

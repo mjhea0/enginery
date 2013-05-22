@@ -33,5 +33,6 @@ module Enginery
       DataMapper: [:repository, :properties, :relationships].freeze,
           Sequel: [:db_schema, :columns, :dataset].freeze
   }.freeze
+  ORM_ASSOCIATIONS = [:belongs_to, :has_one, :has_many, :has_and_belongs_to_many].freeze
   EXECUTABLE = File.expand_path('../../../bin/enginery', __FILE__).freeze
 end
