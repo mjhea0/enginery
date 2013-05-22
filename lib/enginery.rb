@@ -7,7 +7,13 @@ require 'e'
 require 'tenjin'
 
 require 'enginery/enginery'
-require 'enginery/helpers'
+
+require 'enginery/helpers/app'
+require 'enginery/helpers/generic'
+require 'enginery/helpers/input'
+require 'enginery/helpers/orm'
+require 'enginery/helpers/validations'
+
 require 'enginery/configurator'
 require 'enginery/generator'
 require 'enginery/migrator'

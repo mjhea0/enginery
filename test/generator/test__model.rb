@@ -72,7 +72,12 @@ module Enginery
             end
           end
           cleanup
+        end
+      end
 
+      Spec.new self do
+        Dir.chdir DST_ROOT do
+        
           Should 'correctly handle ActiveRecord associations' do
             is(new_app 'App orm:ar').ok?
 
@@ -108,6 +113,11 @@ module Enginery
                 does(model_file).contain? /belongs_to\W+bar/
                 does(model_file).contain? /belongs_to\W+baz/
                 does(model_file).contain? /has_many\W+related_bars/
+                is(delete_model 'Foo').ok?
+
+                is(new_model 'Foo has_and_belongs_to_many:bars has_many:barz:through:baz').ok?
+                does(model_file).contain? /has_and_belongs_to_many\W+bars/i
+                does(model_file).contain? /has_many\W+barz\W+through\W+baz/i
                 is(delete_model 'Foo').ok?
               end
             end
@@ -190,8 +200,8 @@ module Enginery
             end
           end
           cleanup
-
         end
+
       end
     end
   end
