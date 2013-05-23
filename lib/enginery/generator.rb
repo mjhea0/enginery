@@ -84,7 +84,7 @@ module Enginery
       after.each  {|s| source_code << s}
       
       path = dst_path(:controllers, class_to_route(name))
-      file = path + '_controller.rb'
+      file = path + CONTROLLER_SUFFIX
       File.exists?(file) && fail('"%s" controller already exists' % name)
       o
       o '=== Generating "%s" controller ===' % name
@@ -264,6 +264,32 @@ module Enginery
       write_file file, source_code
       output_source_code source_code.split("\n")
       model_name
+    end
+
+    def generate_rear_controller model
+
+      model.nil? || model.empty? && fail('Please provide the model name to build controller for')
+      model_exists?(model) || fail('Seems "%s" model does not exists' % model)
+
+      source_code = []
+      source_code << "defined?(Rear) && Rear.register('#{model}') do"
+      source_code << "  # Rear setups for #{model} model"
+      source_code << "  # Details at https://github.com/espresso/rear"
+      source_code << "  "
+      source_code << "  "
+      source_code << "end"
+      source_code << ""
+      
+      path = dst_path(:rear_controllers, class_to_route(model))
+      file = path + ADMIN_SUFFIX
+      File.exists?(file) && fail('A Rear controller for "%s" model already exists' % model)
+      o
+      o '=== Generating Rear controller for "%s" model ===' % model
+      FileUtils.mkdir_p(File.dirname(path))
+      
+      write_file file, source_code.join("\n")
+      output_source_code source_code
+      model
     end
 
     def generate_spec ctrl_name, name

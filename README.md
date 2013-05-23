@@ -89,6 +89,7 @@ $ enginery m:down migrationID
   | - models/
   | - views/
   | - controllers/
+    ` - rear-controllers/
   | - helpers/
   | - specs/
   | - migrations/
@@ -134,18 +135,12 @@ $ enginery m:down migrationID
 To generate a project simply type:
 
 ```bash
-$ enginery g:p App
+$ enginery g App
 ```
 
 This will create `./App` folder with a ready-to-use application inside.
 
-To generate a new application in current folder simply omit application name, "App" in our case:
-
-```bash
-$ enginery g:p
-```
-
-Also, when generating applications, unit name can be omitted:
+To generate a new application in current folder simply omit application name:
 
 ```bash
 $ enginery g

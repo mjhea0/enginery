@@ -27,6 +27,7 @@ module Enginery
   MODEL_SUFFIX      = '.rb'.freeze
   MIGRATION_SUFFIX  = '.rb'.freeze
   HELPER_SUFFIX     = '.rb'.freeze
+  ADMIN_SUFFIX      = '.rb'.freeze # suffix for Rear controllers
 
   ORM_IDENTITY_METHODS = {
     ActiveRecord: [:connection, :columns, :reflect_on_all_associations].freeze,

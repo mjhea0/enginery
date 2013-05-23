@@ -75,6 +75,14 @@ module Enginery
         %x[#{BIN} delete:mi:y #{args}]
       end
 
+      def new_admin_controller args
+        %x[#{BIN} g:admin #{args}]
+      end
+
+      def delete_admin_controller args
+        %x[#{BIN} delete:admin:y #{args}]
+      end
+
       def migrate_up! args, force_run = false
         %x[#{BIN} migrate:up#{':f' if force_run} #{args}]
       end

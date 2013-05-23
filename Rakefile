@@ -10,9 +10,8 @@ def run unit = nil
     include Enginery::Test::SpecHelper
     cleanup
   end
-  session.halt do
-    cleanup
-  end
+
+  session.halt { cleanup }
   puts "\n***\nTesting %s ..." % (unit ? unit : :everything)
   session.run %r[#{unit}]
   puts session.failures if session.failed?
@@ -20,7 +19,7 @@ def run unit = nil
   session.exit_code == 0
 end
 
-%w[Project Controller Route View Model Spec Helper].each do |unit|
+%w[Project Controller Route View Model Spec Helper Admin].each do |unit|
   desc('Run Tests for %s Generator' % unit)
   task('tg:' + unit.downcase[0]) { run(unit + 'Generator') || fail }
 end
@@ -34,9 +33,9 @@ end
 desc 'Run all Migrator tests'
 task(:tm) { run(:Migrator) || fail }
 
-%w[Controller Route View Spec Model Migration Helper].each do |unit|
+%w[Controller Route View Spec Model Migration Helper Admin].each do |unit|
   desc('Run %s Deletion Tests' % unit)
-  task('td:' + (unit =~ /m/i ?  unit.downcase[0..1] : unit.downcase[0])) { run('Delete' + unit) || fail }
+  task('td:' + (unit =~ /\Am/i ?  unit.downcase[0..1] : unit.downcase[0])) { run('Delete' + unit) || fail }
 end
 desc 'Run all Deletion tests'
 task(:td) { run(:Delete) || fail }

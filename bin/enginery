@@ -21,11 +21,11 @@ end
 root, operation = Dir.pwd, $*[0].to_s
 
 OptionParser.new do |o|
-  o.on '-c', "Display controllers list" do
+  o.on '-c', "Display controllers in YAML format" do
     puts Enginery::Registry.new(root).controllers
     exit 0
   end
-  o.on '-m', "Display models list" do
+  o.on '-m', "Display models in YAML format" do
     puts Enginery::Registry.new(root).models
     exit 0
   end
@@ -41,8 +41,7 @@ result = catch :enginery_failures do
     generator = Enginery::Generator.new(root, setups)
 
     if args
-      if unit.empty? || unit =~ /\A[p|a]/i
-        # generating project
+      if unit.empty? # generating application
         if generator.generate_project(args[0])
           Dir.chdir generator.dst_root do
             puts "\nRunning bundler ...\n"
@@ -96,12 +95,16 @@ result = catch :enginery_failures do
         when unit =~ /\Av(iew)?/
           generator.generate_view(args[0], args[1])
 
+        when unit =~ /\Aa(dmin)?(_c(ontroller)?)?/
+          generator.generate_rear_controller(args[0])
+
         when unit =~ /\Am(odel)?/
           if args.size > 1 # generate multiple models
             args.each {|m| puts %x["#{$0}" g:m #{m} #{string_setups}]}
           else
             if generator.generate_model(args[0])
               puts %x["#{$0}" m initializing-#{args[0]}-model create_table_for:#{args[0]} #{string_setups}]
+              puts %x["#{$0}" g:admin #{args[0]}]
             end
           end
         end
@@ -186,6 +189,8 @@ result = catch :enginery_failures do
       delete_meth, delete_args, required_args = :spec, args[0..1], 2
     when unit =~ /\Ah(elper)?/
       delete_meth, delete_args, required_args = :helper, args[0..0], 1
+    when unit =~ /\Aa(dmin)?(_c(ontroller)?)?/
+      delete_meth, delete_args, required_args = :rear_controller, args[0..0], 1
     when unit =~ /\Amo(del)?/
       delete_meth, delete_args, required_args = :model, args[0..0], 1
     when unit =~ /\Ami(gration)?/

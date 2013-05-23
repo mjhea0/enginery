@@ -29,6 +29,17 @@ module Enginery
 
     end
 
+    def rear_controller model
+      
+      file = dst_path(:rear_controllers, class_to_route(model) + ADMIN_SUFFIX)
+      
+      if File.exists?(file)
+        o
+        o '*** Deleting "%s" file ***' % unrootify(file)
+        FileUtils.rm(file)
+      end
+    end
+
     def route controller, name
       file, * = valid_route?(controller, name)
       if File.exists?(file)
@@ -84,6 +95,7 @@ module Enginery
       migrations_by_model(name).each do |m|
         migration m.split('.').first
       end
+      rear_controller(name)
       true
     end
 

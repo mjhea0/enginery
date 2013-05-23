@@ -48,6 +48,7 @@ module Enginery
           :helpers
         ].each {|d| paths[d] = File.join(paths[:base], d.to_s, '')}
 
+        paths[:rear_controllers] = File.join(paths[:controllers], 'rear-controllers', '')
         paths[:config_yml]   = File.join(paths[:config], 'config.yml')
         paths[:database_yml] = File.join(paths[:config], 'database.yml')
         
@@ -63,7 +64,7 @@ module Enginery
         [paths, Struct.new(*paths.keys).new(*paths.values)]
       end
       paths, struct = @dst_path_map
-      return struct if  args.empty?
+      return struct if args.empty?
       
       paths[args.first] || fail('%s is not a recognized destination path.
         Use one of %s' % [args.first.inspect, paths.map(&:inspect)*', '])

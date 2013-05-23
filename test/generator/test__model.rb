@@ -59,8 +59,6 @@ module Enginery
              
               end
 
-              
-
               Should 'include modules provided via include: option' do
                 is(new_model 'BarBaz i:Rack::Utils').ok?
 

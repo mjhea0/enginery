@@ -12,13 +12,15 @@ Gem::Specification.new do |s|
   s.description = 'Stuff Builder for Espresso Framework'
 
   s.required_ruby_version = '>= 1.9.2'
-
+  
   s.add_dependency 'e', '>= 0.4.7'
+  s.add_dependency 'rear', '>= 0.0.9'
   s.add_dependency 'bundler'
   s.add_dependency 'tenjin'
 
   s.require_paths = ['lib']
   s.files = Dir['**/{*,.[a-z]*}'].reject {|e| e =~ /\.(gem|lock)\Z/}
+  
   s.executables = ['enginery']
   
   s.licenses = ['MIT']
