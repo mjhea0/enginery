@@ -22,3 +22,4 @@ gem 'el' # Espresso Lungo
 gem 'thin'
 
 gem 'enginery' # needed to run migrations
+gem 'rear' # Admin interface for ActiveRecord/DataMapper/Sequel models
