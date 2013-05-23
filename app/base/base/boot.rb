@@ -38,3 +38,5 @@ Dir[Cfg.models_path('**/*.rb')].each {|f| require f}
 %w[**/*_controller.rb **/*.rb].each do |m|
   Dir[Cfg.controllers_path(m)].each {|f| require f}
 end
+
+defined?(Rear) && App.mount(Rear.controllers, '/admin')
