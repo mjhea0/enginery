@@ -51,11 +51,11 @@ module Enginery
           name: c.name,
           path: path,
           file: unrootify(dst_path(:models, path + MODEL_SUFFIX)),
+          rear_file: unrootify(dst_path(:rear_controllers, path + ADMIN_SUFFIX)),
           dom_id: c.name.gsub(/\W/m, ''),
           migrations: migrations
         }
       end.to_yaml
     end
-
   end
 end
