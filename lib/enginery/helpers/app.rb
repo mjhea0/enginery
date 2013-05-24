@@ -67,5 +67,13 @@ module Enginery
       ]
     end
 
+    def app_config
+      pv, $VERBOSE = $VERBOSE, nil
+      load dst_path.config_rb
+      Cfg
+    ensure
+      $VERBOSE = pv
+    end
+
   end
 end

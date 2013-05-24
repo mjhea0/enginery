@@ -49,7 +49,8 @@ module Enginery
         ].each {|d| paths[d] = File.join(paths[:base], d.to_s, '')}
 
         paths[:rear_controllers] = File.join(paths[:controllers], 'rear-controllers', '')
-        paths[:config_yml]   = File.join(paths[:config], 'config.yml')
+        paths[:config_rb] = File.join(paths[:base], 'config.rb')
+        paths[:config_yml] = File.join(paths[:config], 'config.yml')
         paths[:database_yml] = File.join(paths[:config], 'database.yml')
         
         [

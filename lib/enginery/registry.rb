@@ -34,7 +34,6 @@ module Enginery
     end
 
     def models
-      boot_app
       app_models.inject({}) do |f,c|
         path = EUtils.class_to_route(c.name)
         migrations = migrations_by_model(c.name).inject({}) do |f,m| 
@@ -48,16 +47,19 @@ module Enginery
             path: file.sub(dst_path.migrations, '')
           }
         end
+        rear_root = app_config[:admin_url] || :admin
+        rear_path = EUtils.rootify_url(rear_root, EUtils.class_to_route(c.name))
         f.merge c.name => {
           name: c.name,
           path: path,
           file: unrootify(dst_path(:models, path + MODEL_SUFFIX)),
           rear_file: unrootify(dst_path(:rear_controllers, path + ADMIN_SUFFIX)),
-          rear_path: c::RearController.base_url,
+          rear_path: rear_path,
           dom_id: c.name.gsub(/\W/m, ''),
           migrations: migrations
         }
       end.to_yaml
     end
+
   end
 end

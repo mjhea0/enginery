@@ -25,8 +25,8 @@ App = E.new :automount do
   end
 
   on_boot do
-    DataMapper.finalize if Cfg[:orm].to_s =~ /\Ad/i
-    defined?(Rear) && App.mount(Rear.controllers, '/admin')
+    defined?(Rear) && mount(Rear.controllers, Cfg[:admin_url] || :admin)
+    defined?(DataMapper) && DataMapper.finalize
   end
 end
 
