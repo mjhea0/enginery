@@ -34,6 +34,7 @@ module Enginery
     end
 
     def models
+      boot_app
       app_models.inject({}) do |f,c|
         path = EUtils.class_to_route(c.name)
         migrations = migrations_by_model(c.name).inject({}) do |f,m| 
@@ -52,6 +53,7 @@ module Enginery
           path: path,
           file: unrootify(dst_path(:models, path + MODEL_SUFFIX)),
           rear_file: unrootify(dst_path(:rear_controllers, path + ADMIN_SUFFIX)),
+          rear_path: c::RearController.base_url,
           dom_id: c.name.gsub(/\W/m, ''),
           migrations: migrations
         }
