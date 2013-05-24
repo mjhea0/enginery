@@ -1,10 +1,17 @@
 # any keys defied here will be available as Cfg[key]
+# Cfg[:server], Cfg[:port] etc.
+
 development:
   server: Thin
   port:   5252
+  admin_url: /admin
+
 test:
   server: Thin
   port:   5252
+  admin_url: /admin
+
 production:
   server: Thin
   port:   5252
+  admin_url: /admin

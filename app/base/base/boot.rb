@@ -25,7 +25,7 @@ App = E.new :automount do
   end
 
   on_boot do
-    defined?(Rear) && mount(Rear.controllers, Cfg[:admin_url] || :admin)
+    defined?(Rear) && (url = Cfg[:admin_url]) && mount(Rear.controllers, url)
     defined?(DataMapper) && DataMapper.finalize
   end
 end
