@@ -24,7 +24,10 @@ App = E.new :automount do
     use Rack::ShowExceptions
   end
 
-  DataMapper.finalize if Cfg[:orm].to_s =~ /\Ad/i
+  on_boot do
+    DataMapper.finalize if Cfg[:orm].to_s =~ /\Ad/i
+    defined?(Rear) && App.mount(Rear.controllers, '/admin')
+  end
 end
 
 # loading helpers
@@ -38,5 +41,3 @@ Dir[Cfg.models_path('**/*.rb')].each {|f| require f}
 %w[**/*_controller.rb **/*.rb].each do |m|
   Dir[Cfg.controllers_path(m)].each {|f| require f}
 end
-
-defined?(Rear) && App.mount(Rear.controllers, '/admin')
