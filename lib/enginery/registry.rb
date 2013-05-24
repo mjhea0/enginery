@@ -47,8 +47,10 @@ module Enginery
             path: file.sub(dst_path.migrations, '')
           }
         end
-        rear_root = app_config[:admin_url] || :admin
-        rear_path = EUtils.rootify_url(rear_root, EUtils.class_to_route(c.name))
+        
+        admin_url = app_config[:admin_url]
+        rear_path = admin_url && EUtils.rootify_url(admin_url, EUtils.class_to_route(c.name))
+
         f.merge c.name => {
           name: c.name,
           path: path,
