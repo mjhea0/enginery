@@ -128,7 +128,8 @@ $ enginery m:down migrationID
 [Specs](https://github.com/espresso/enginery#specs) |
 [Views](https://github.com/espresso/enginery#views) |
 [Models](https://github.com/espresso/enginery#models) |
-[Migrations](https://github.com/espresso/enginery#migrations)
+[Migrations](https://github.com/espresso/enginery#migrations) |
+[Admin Interface](https://github.com/espresso/enginery#admin-interface)
 
 ## Projects
 
@@ -614,6 +615,32 @@ end
 ```
 and will update your Gemfile by adding corresponding gems, unless they are already there.
 
+### Associations
+
+With Enginery you can specify a list of associations at model generation.
+
+Supported associations:
+
+  - belongs_to
+  - has_one
+  - has_many
+  - has_and_belongs_to_many
+
+Though associations are passed in ActiveRecord way, they will be automatically adjusted if another ORM used.
+
+```bash
+enginery g:m State has_many:cities
+enginery g:m City belongs_to:state
+```
+
+If you need a `through` association simply use `:through` option:
+
+```bash
+enginery g:m Photo has_many:tags:through:tagging
+enginery g:m Tag has_many:photos:through:tagging
+```
+
+
 ### Multiple
 
 Generating multiple models at once:
@@ -890,6 +917,20 @@ Use `$ rake -D` to list all tasks.
 **Note on renaming columns:** as of 'dm-migrations' 1.2.0 renaming columns are broken for MySQL adapter. Master branch have it [fixed](https://github.com/datamapper/dm-migrations/blob/8bfcec08286a12ceee1bc3e5a01da3b5b7d4a74d/lib/dm-migrations/sql/table_modifier.rb#L35) but not yet released.
 
 **[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
+
+
+## Admin Interface
+
+`Enginery` is using [`Rear`](https://github.com/espresso/rear) to build a admin interface for generated models.
+
+Admin interface will be automatically mounted at `/admin`.
+
+To mount it elsewhere, edit `config/config.yml` by updating `:admin_url` setting.
+
+To disable admin interface simply remove `:admin_url` setting from `config/config.yml`.
+
+**[ [contents &uarr;](https://github.com/espresso/enginery#tutorial) ]**
+
 
 ## Contributing
 

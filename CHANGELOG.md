@@ -1,9 +1,10 @@
 
 + 0.0.8 [HEAD]
-  - Allow defining associations when generating models - [5286c59](https://github.com/espresso/enginery/commit/5286c59)
+  - Automatically generate Rear controllers for new models.
+  - Allow defining associations for new models - [5286c59](https://github.com/espresso/enginery/commit/5286c59)
   - Ability to delete any generated unit.
   - Default layout for `ERB`, `ERubis`, `Haml` and `Slim` engines.
-  - Automatically generate and include helpers.
+  - Automatically generate and include helpers for new controllers.
   - Migrator - DataMapper - auto-update model file when performing migrations.
   - Migrator - keep tracks in database so it is usable on environments with readonly filesystem - [52360b5](https://github.com/espresso/enginery/commit/52360b5)
   - Migrator - when available, use `ENV['DATABASE_URL']` instead of config/database.yml - [bbb41618](https://github.com/espresso/enginery/commit/bbb41618)
