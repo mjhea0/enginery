@@ -1,5 +1,5 @@
 
-+ 0.0.8 [HEAD]
++ 0.0.8 [May 25, 2013]
   - Automatically generate Rear controllers for new models.
   - Allow defining associations for new models - [5286c59](https://github.com/espresso/enginery/commit/5286c59)
   - Ability to delete any generated unit.
