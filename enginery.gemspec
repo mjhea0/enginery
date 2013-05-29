@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   
   s.add_dependency 'e',    '>= 0.4.8'
   s.add_dependency 'el',   '>= 0.4.8'
-  s.add_dependency 'rear', '>= 0.0.9'
+  s.add_dependency 'rear', '>= 0.1.0'
   s.add_dependency 'bundler'
   s.add_dependency 'tenjin'
 
