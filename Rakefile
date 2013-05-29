@@ -1,7 +1,6 @@
-require 'rake'
-require 'bundler/gem_helper'
+require 'bundler'
+Bundler.require
 require './test/setup'
-Dir['./test/**/test__*.rb'].each { |f| require f }
 
 def run unit = nil
   session = Specular.new

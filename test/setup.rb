@@ -1,6 +1,4 @@
 require 'stringio'
-require 'bundler/setup'
-Bundler.require
 
 module Enginery
   module Test
@@ -16,4 +14,5 @@ module Enginery
   end
 end
 
-Dir['./test/support/*.rb'].each {|f| require f}
+Dir['./test/support/*.rb' ].each {|f| require f}
+Dir['./test/**/test__*.rb'].each {|f| require f}

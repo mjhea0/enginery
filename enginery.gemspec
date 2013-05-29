@@ -19,10 +19,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'bundler'
   s.add_dependency 'tenjin'
 
+  s.add_development_dependency 'bundler'
+
   s.require_paths = ['lib']
   s.files = Dir['**/{*,.[a-z]*}'].reject {|e| e =~ /\.(gem|lock)\Z/}
-  
   s.executables = ['enginery']
-  
   s.licenses = ['MIT']
 end
