@@ -1,26 +1,21 @@
 #!/usr/bin/env ruby
 require 'optparse'
 
-ENV['E_DEV'] && %w[
-  e el
-].each {|g| $:.unshift(File.expand_path('../../../%s/lib' % g, __FILE__))}
-
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'enginery'
 require 'enginery/usage'
 
-if $*.empty? || $*[0] == 'h' || $*[0] == '-h'
-  puts Enginery.usage
-  exit 0
-end
-if $*[0] == 'v' || $*[0] == '-v'
-  puts EngineryVersion::FULL
-  exit 0
-end
-
 root, operation = Dir.pwd, $*[0].to_s
 
 OptionParser.new do |o|
+  o.on '-h' do
+    puts Enginery.usage
+    exit 0
+  end
+  o.on '-v' do
+    puts EngineryVersion::FULL
+    exit 0
+  end
   o.on '-c', "Display controllers in YAML format" do
     puts Enginery::Registry.new(root).controllers
     exit 0
