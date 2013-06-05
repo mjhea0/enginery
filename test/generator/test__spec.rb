@@ -7,7 +7,7 @@ module Enginery
         Dir.chdir DST_ROOT do
           is(new_app 'App').ok?
           Dir.chdir 'App' do
-            does(File.read 'Rakefile') =~ /Specular\.new/
+            does(File.read 'Rakefile') =~ /specular/
 
             Should 'be created alongside route' do
               is(new_controller 'A').ok?
