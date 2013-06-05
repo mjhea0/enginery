@@ -29,7 +29,7 @@ App.mounted_controllers.reject do |c|
   specular_tasks << task_name
 end
 
-task 'test:each' => specular_tasks
+task 'test:controllers' => specular_tasks
 
 desc 'Run all tests'
 task :test do
