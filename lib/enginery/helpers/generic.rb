@@ -78,6 +78,13 @@ module Enginery
       path.gsub(/\/+/, '/').sub(regexp, '')
     end
 
+    def o *chunks
+      @logger ||= Logger.new(STDOUT)
+      opts = chunks.last.is_a?(Hash) ? chunks.pop : {}
+      @logger << "%s\n" % chunks.join(opts[:join].to_s)
+    end
+    module_function :o
+
     private
 
     def write_file file, data
@@ -89,13 +96,6 @@ module Enginery
       o '*** Updating "%s" ***' % unrootify(file)
       File.open(file, 'a+') {|f| f << (data.respond_to?(:join) ? data.join : data)}
     end
-
-    def o *chunks
-      @logger ||= Logger.new(STDOUT)
-      opts = chunks.last.is_a?(Hash) ? chunks.pop : {}
-      @logger << "%s\n" % chunks.join(opts[:join].to_s)
-    end
-    module_function :o
 
     def namespace_to_source_code name
       names, constants = name.split('::'), []
