@@ -1,8 +1,10 @@
-require 'bundler/setup'
-Bundler.require(:default)
+Dir.chdir File.expand_path('../..', __FILE__) do # load application from any location
+  require 'bundler/setup'
+  Bundler.require(:default)
 
-require File.expand_path('../config', __FILE__)
-Bundler.require(Cfg.env)
+  require './base/config'
+  Bundler.require(Cfg.env)
+end
 
 require Cfg.base_path('database.rb')
 
