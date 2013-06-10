@@ -101,13 +101,10 @@ module Enginery
 
     def migration name
       name.nil? || name.empty? && fail("Please provide migration name")
-      boot_app
-      migrator = Migrator.new(dst_root)
-      is_datamapper = migrator.guess_orm == :DataMapper
       Dir[dst_path(:migrations, '**/%s.*%s' % [name, MIGRATION_SUFFIX])].each do |file|
-        if is_datamapper
-          load file
-          migrator.update_model_file(Enginery::Migrator::MigratorContext, :down)
+        load_file file
+        if defined?(DataMapper::Migration) && Migrator::MigratorInstance.instance_of?(DataMapper::Migration)
+          Migrator.new(dst_root).update_model_file(Migrator::MigratorContext, :down)
         end
         o '*** Deleting "%s" file ***' % unrootify(file)
         o
