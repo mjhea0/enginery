@@ -1,10 +1,11 @@
-connection = if url = Cfg.db[:url]
-  Sequel.connect(url)
-elsif Cfg.db[:type] && Cfg.db[:name]
-  if Cfg.db[:type] =~ /sqlite/i
-    Sequel.sqlite(Cfg.db[:name] =~ /\A\// ? Cfg.db[:name] : Cfg.root_path(Cfg.db[:name]))
-  else
-    Sequel.connect("%s://%s:%s@%s/%s" % Cfg.db.values_at(:type, :user, :pass, :host, :name))
+unless url = Cfg.db[:url]
+  if (type = Cfg.db[:type]) && (name = Cfg.db[:name])
+    if type =~ /sqlite/i
+      url = [(name =~ /\A\// ? name : Cfg.root_path(name)), :sqlite]
+    else
+      url = '%s://%s:%s@%s/%s' % Cfg.db.values_at(:type, :user, :pass, :host, :name)
+    end
   end
 end
-Sequel::Model.db = connection if connection
+url, connection_method = url
+Sequel::Model.db = Sequel.send(connection_method || :connect, url) if url
