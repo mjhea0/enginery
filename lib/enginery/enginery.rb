@@ -34,6 +34,8 @@ module Enginery
       DataMapper: [:repository, :properties, :relationships].freeze,
           Sequel: [:db_schema, :columns, :dataset].freeze
   }.freeze
+  ORM_MATCHERS = Hash[ORM_IDENTITY_METHODS.keys.zip(ORM_IDENTITY_METHODS.keys.map{|x| Regexp.new(x.to_s, 'i')})]
   ORM_ASSOCIATIONS = [:belongs_to, :has_one, :has_many, :has_and_belongs_to_many].freeze
+  
   EXECUTABLE = File.expand_path('../../../bin/enginery', __FILE__).freeze
 end

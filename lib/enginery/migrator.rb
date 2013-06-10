@@ -131,6 +131,36 @@ module Enginery
       [track.vector, track.performed_at]
     end
 
+    def update_model_file context, vector
+      model = context[:model]
+      file = dst_path(:models, class_to_route(model) + MODEL_SUFFIX)
+      return unless File.file?(file)
+
+      lines, properties = File.readlines(file), []
+      lines.each_with_index do |l,i|
+        property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
+        properties << (property << i) if property[1] && property[2]
+      end
+      return if properties.empty?
+
+      new_lines = case vector.to_s.downcase.to_sym
+      when :up
+         add_properties(lines, properties, context)
+      when :down
+        remove_properties(lines, properties, context)
+      end
+
+      return unless new_lines
+      File.open(file, 'w') {|f| f << new_lines.join}
+    end
+
+    def guess_orm
+      orm = (@setups[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
+        Please update config/config.yml by adding
+        orm: [DataMapper|ActiveRecord|Sequel]')).to_s.strip
+      (ORM_MATCHERS.find {|o,m| orm =~ m} || fail('"%s" ORM not supported')).first
+    end
+
     private
 
     # load migration file and call corresponding methods that will run migration up/down
@@ -177,52 +207,6 @@ module Enginery
       end
     end
 
-    def update_model_file context, vector
-      model = context[:model]
-      file = dst_path(:models, class_to_route(model) + MODEL_SUFFIX)
-      return unless File.file?(file)
-
-      lines, properties = File.readlines(file), []
-      lines.each_with_index do |l,i|
-        property = l.scan(/(\s+)?property\s+[\W]?(\w+)\W+(\w+)(.*)/).flatten
-        properties << (property << i) if property[1] && property[2]
-      end
-      return if properties.empty?
-
-      new_lines = case vector.to_s.downcase.to_sym
-      when :up
-         add_properties(lines, properties, context)
-      when :down
-        remove_properties(lines, properties, context)
-      end
-
-      return unless new_lines
-      File.open(file, 'w') {|f| f << new_lines.join}
-    end
-
-    def remove_properties lines, properties, context
-      property = nil
-
-      context[:create_columns].each do |(n)|
-        next unless property = properties.find {|p| p[1].to_s == n.to_s}
-        lines[property.last] = nil
-      end
-
-      context[:rename_columns].each do |(cn,nn)|
-        next unless property = properties.find {|p| p[1].to_s == nn.to_s}
-        property[1] = cn
-        lines[property.last] = "%sproperty :%s, %s%s\n" % property
-      end
-
-      context[:update_columns].each do |(n,nt,ot)|
-        next unless property = properties.find {|p| p[1].to_s == n.to_s}
-        property[2] = ot.to_s.split('::').last
-        lines[property.last] = "%sproperty :%s, %s%s\n" % property
-      end
-
-      property ? lines : nil
-    end
-
     def add_properties lines, properties, context
       property_setup, new_properties = nil, []
 
@@ -248,6 +232,30 @@ module Enginery
       end
 
       property_setup ? lines : nil
+    end
+
+
+    def remove_properties lines, properties, context
+      property = nil
+
+      context[:create_columns].each do |(n)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        lines[property.last] = nil
+      end
+
+      context[:rename_columns].each do |(cn,nn)|
+        next unless property = properties.find {|p| p[1].to_s == nn.to_s}
+        property[1] = cn
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property
+      end
+
+      context[:update_columns].each do |(n,nt,ot)|
+        next unless property = properties.find {|p| p[1].to_s == n.to_s}
+        property[2] = ot.to_s.split('::').last
+        lines[property.last] = "%sproperty :%s, %s%s\n" % property
+      end
+
+      property ? lines : nil
     end
 
     def create_tracking_table_if_needed
@@ -314,7 +322,7 @@ module Enginery
       type ||= default_column_type(orm)
       case orm
       when :DataMapper
-          'DataMapper::Property::%s' % capitalize(type)
+        'DataMapper::Property::%s' % capitalize(type)
       when :Sequel
         type.to_s =~ /text/i ? "String, text: true" : capitalize(type)
       else
@@ -326,12 +334,6 @@ module Enginery
     # we need SomeString instead, which is returned by this method
     def capitalize smth
       smth.to_s.match(/(\w)(.*)/) {|m| m[1].upcase << m[2]}
-    end
-
-    def guess_orm
-      (@setups[:orm] || Cfg[:orm] || fail('No project-wide ORM detected.
-        Please update config/config.yml by adding
-        orm: [DataMapper|ActiveRecord|Sequel]')).to_sym
     end
 
     def validate_vector vector

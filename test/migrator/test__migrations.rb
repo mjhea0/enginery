@@ -1,5 +1,6 @@
 module Enginery
   module Test
+    
     ORMs.each do |orm|
       Spec.new orm + 'Migrator' do
         
@@ -66,27 +67,37 @@ module Enginery
                   # running this test only on DataMapper
                   model_file = 'base/models/a.rb'
 
-                  Ensure 'foo property added with new migration' do
+                  Should 'update model file by adding/updating properties' do
+
                     is(new_migration("addFoo model:A column:foo")).ok?
-                    Ensure 'foo property does not exists' do
-                      refute(File.read(model_file)) =~ /property\W+foo/
-                    end
-                    is(migrate_up! 4).ok?
+                    
+                    refute(File.read(model_file)) =~ /property\W+foo/
+                    migrate_up!(4)
                     does(File.read(model_file)) =~ /property\W+foo/
 
-                    Should 'change property type with new migration' do
+                    Ensure 'foo type updated' do
                       does(File.read(model_file)) =~ /property\W+foo\W+String/
                       is(new_migration("updateBAR model:A update_column:foo:text")).ok?
-                      is(migrate_up! 5).ok?
+                      migrate_up!(5)
                       refute(File.read(model_file)) =~ /property\W+foo\W+String/
                       does(File.read(model_file)) =~ /property\W+foo\W+Text/
                     end
-                    Should 'rename foo to bar with new migration' do
+                    
+                    Ensure 'foo renamed to bar' do
                       is(new_migration("fooTObar model:A rename_column:foo:bar")).ok?
-                      is(migrate_up! 6).ok?
+                      migrate_up!(6)
                       refute(File.read(model_file)) =~ /property\W+foo/
-                      does(File.read(model_file)) =~ /property\W+bar/
+                      does(File.read(model_file))  =~ /property\W+bar/
                     end
+                  
+                  end
+
+                  Should 'update model file by removing properties' do
+                    is(new_migration("addRemoveMe model:A column:removeme")).ok?
+                    is(migrate_up! 7).ok?
+                    does(File.read(model_file)) =~ /property\W+removeme/
+                    delete_migration(7)
+                    refute(File.read(model_file)) =~ /property\W+removeme/
                   end
                   
                 else
